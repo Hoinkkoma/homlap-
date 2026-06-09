@@ -79,8 +79,8 @@ Vollständige Liste aller verfügbaren Services mit:
 | Gerät | Modell | Funktion | Verbindung |
 |------|--------|---------|-----------|
 | **Smartphone** | Nothing Phone 2a | Primäres mobiles Gerät | WiFi + Tailscale VPN |
-| **Kopfhörer** | Nothing Buds 2a | Audio & Benachrichtigungen | Bluetooth |
-| **Smartwatch** | Xiaomi Watch | Monitoring & Alerts | WiFi + Bluetooth |
+| **Kopfhörer** | Nothing Buds 2a | Audio  | Bluetooth |
+| **Smartwatch** | Xiaomi Watch | Monitoring & Alerts |   Bluetooth |
 
 ### 💻 **Laptops & Workstationen**
 
