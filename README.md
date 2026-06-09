@@ -69,7 +69,7 @@ Vollständige Liste aller verfügbaren Services mit:
 
 ### 🖥️ ***Server & Storage***
 
-| Server | Modell | Rolle | Status |
+| komponenten haupt  | Modell | Rolle | Status |
 |-----------|--------|-------|--------|
 | **Debian Server  | Lenovo Tinkcenter Mini | Zentrale Verwaltung, Services | ✅ Aktiv |
 | **TrueNAS Server  | Lenovo Tinkcenter Tower | Storage, Backup, Archivierung | ✅ Aktiv |
