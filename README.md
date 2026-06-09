@@ -22,7 +22,7 @@ Dies ist mein persönliches Homlap-Projekt (Home Lab). Ein sicheres, experimente
 ## 🎯 Übersicht
 
 **Homlap** ist ein zentrales  Heimnetzwerk-Setup bestehend aus:
-- Mehren  physische  Server
+- Mehren   physische  Servern 
 - Sichere Netzwerk-Infrastruktur mit VPN-Overlay
 - Self-hosted Services und Anwendungen
 - Automatisierte Monitoring- und Backup-Lösungen
