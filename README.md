@@ -1,5 +1,5 @@
 # 🏠 Homlap - Mein dezentrales Heimnetzwerk-Projekt 
-# *Ist  Aktuell in  Arbeit* 
+ *Ist  Aktuell in  Arbeit* 
 Dies ist mein persönliches Homlap-Projekt (Home Lab). Ein sicheres, experimentelles und skalierbares Heimnetzwerk-Setup mit Fokus auf **Sicherheit**, **Ausfallsicherheit** und **Kontinuierliche Verbesserung**.
 
 ---
