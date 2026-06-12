@@ -189,10 +189,10 @@ Vollständige Liste aller verfügbaren Services mit:
 
 ---
 
-### 💾 **TrueNAS Server (Tower)** - Storage & Backup
+### 💾 **Proxmox Server (Tower)** - Storage & Backup, vms 
 
 #### System-Informationen
-- **OS**: TrueNAS Core
+- **OS**: Proxmox
 - **Rolle**: Zentrale Storage- & Backup-Lösung
 - **Filesystem**: ZFS mit RAID-Redundanz
 - **Kapazität**: Enterprise-Skalierbarkeit
