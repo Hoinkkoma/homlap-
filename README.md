@@ -48,7 +48,7 @@ Zeigt die Verbindungen zwischen:
 - Servern und Speichersystemen
 - Mobilen Geräten und Workstations
 - VPN-Overlay-Netzwerk (Tailscale)
-- Externen Netzwerk-Switches
+-  Netzwerk-Switches
 
 ### 📄 **Seite 2: Debian Server Mini - Services**
 Detaillierte Übersicht aller Services auf dem Debian Mini Server:
