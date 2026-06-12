@@ -72,7 +72,7 @@ Vollständige Liste aller verfügbaren Services mit:
 | komponenten haupt  | Modell | Rolle | Status |
 |-----------|--------|-------|--------|
 | **Debian Server  | Lenovo Tinkcenter Mini | Zentrale Verwaltung, Services | ✅ Aktiv |
-| **TrueNAS Server  | Lenovo Tinkcenter Tower | Storage, Backup, Archivierung | ✅ Aktiv |
+| **Proxmox server   | Lenovo Tinkcenter Tower | Storage, Backup, Archivierung | ✅ Aktiv |
 | **Router** | AVM FritzBox | Netzwerk-Hub, DHCP, DNS | ✅ Aktiv |
 
 ### 📱 **Mobilgeräte & Peripherie**
