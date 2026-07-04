@@ -1,20 +1,21 @@
-# 🏠 Homlap - Mein dezentrales Heimnetzwerk-Projekt 
- ***Ist  Aktuell in  Arbeit*** 
+# 🏠 Homlap - Dezentrales Heimnetzwerk-Projekt
 
-Dies ist mein persönliches Homlap-Projekt (Home Lab). Ein sicheres, experimentelles und skalierbares Heimnetzwerk-Setup mit Fokus auf **Sicherheit**, **Ausfallsicherheit** und **Kontinuierliche Verbesserung**.
+**Status:** ✅ Aktive Entwicklung (Phase 7+)
+
+Ein sicheres, experimentelles und skalierbares Heimnetzwerk-Setup mit Fokus auf **Sicherheit**, **Selbstbestimmung** und **kontinuierliche Optimierung**.
 
 ---
 
 ## 📋 Inhaltsverzeichnis
 
 - [Übersicht](#übersicht)
-- [Netzwerk-Architektur](#netzwerk-architektur)
+- [Architektur-Übersicht](#architektur-übersicht)
 - [Kernkomponenten](#kernkomponenten)
 - [Server & Services](#server--services)
 - [Design-Prinzipien](#design-prinzipien)
 - [Deployment & Betrieb](#deployment--betrieb)
 - [Sicherheitskonzept](#sicherheitskonzept)
-- [Monitoring & Wartung](#monitoring--wartung)
+- [Lessons Learned](#lessons-learned)
 - [Nächste Schritte](#nächste-schritte)
 - [Ressourcen](#ressourcen)
 
@@ -22,255 +23,176 @@ Dies ist mein persönliches Homlap-Projekt (Home Lab). Ein sicheres, experimente
 
 ## 🎯 Übersicht
 
-**Homlap** ist ein zentrales  Heimnetzwerk-Setup bestehend aus:
-- Mehren   physische  Servern 
-- Sichere Netzwerk-Infrastruktur mit VPN-Overlay
-- Self-hosted Services und Anwendungen
-- Automatisierte Monitoring- und Backup-Lösungen
-- Mobile und Desktop-Clients
+**Homlap** ist eine Two-Server-Architektur mit:
+
+- ✅ **Zwei physische Server** (Mini-PC + Tower für Storage)
+- ✅ **Sichere Netzwerk-Infrastruktur** (Tailscale VPN-Overlay)
+- ✅ **Self-hosted Services** (Docker, LXC-Container, VMs)
+- ✅ **Vollständiges Monitoring** (Prometheus, Grafana, Loki)
+- ✅ **Automatisierte Backups** (ZFS Snapshots & Replikation)
+- ✅ **Exit-Node-Routing** für mobile Geräte
 
 **Kernziele:**
-✅ Sicherheit durch Verschlüsselung und Segmentierung  
-✅ Datenschutz durch Self-Hosting  
+
+✅ Datenschutz durch Self-Hosting (keine Cloud-Abhängigkeit)  
+✅ Sicherheit durch Verschlüsselung & Segmentierung  
 ✅ Experimentierplattform für neue Technologien  
 ✅ Höchste Verfügbarkeit kritischer Services  
-✅ Vollständige Kontrollierbarkeit aller Infrastruktur-Komponenten
+✅ Vollständige Kontrolle über alle Komponenten
 
 ---
 
-## 🏗️ Netzwerk-Architektur
+## 🏗️ Architektur-Übersicht
 
-Die detaillierte Architektur ist in der Datei `homlao.drawio` dokumentiert (3 Seiten):
+Siehe auch: [ARCHITECTURE.md](ARCHITECTURE.md) für detaillierte Dokumentation
 
-### 📄 **Seite 1: Komplette Netzwerk-Topologie**
-Zeigt die Verbindungen zwischen:
-- Zentralem Router (FritzBox)
-- Servern und Speichersystemen
-- Mobilen Geräten und Workstations
-- VPN-Overlay-Netzwerk (Tailscale)
--  Netzwerk-Switches
+### Two-Server-Setup
 
-### 📄 **Seite 2: Debian Server Mini - Services**
-Detaillierte Übersicht aller Services auf dem Debian Mini Server:
-- Netzwerk-Services (Tailscale, Pi-hole)
-- Monitoring & Automation (Homepache, Ukuma, Netdata)
-- Dashboard & Visualisierung (Glance, it-tools)
-- Datenschutz (ClamAV, Immich)
+| Server | Rolle | OS | Services |
+|--------|-------|-----|----------|
+| **Debian Mini-PC** | Zentrale Service-Plattform | Debian 12 | Tailscale, Caddy, Pi-hole, Homepage, Monitoring |
+| **Proxmox Tower** | Hypervisor, Storage, Backup | Proxmox VE | LXC-Container (Vaultwarden, Caddy, PMG), VMs |
 
-### 📄 **Seite 3: Verfügbare Services & Anwendungen**
-Vollständige Liste aller verfügbaren Services mit:
-- Service-Kategorien (Netzwerk, Storage, Automation, etc.)
-- Abhängigkeiten zwischen Services
-- Verfügbarkeitsstatus
+### Netzwerk-Topologie
+
+```
+┌─────────────────────────────────────────────────┐
+│                 Router (FritzBox)               │
+│         DNS/DHCP, LAN-Hub (192.168.178.x)       │
+└──┬────────────────────────────────────┬─────────┘
+   │                                    │
+   ├─→ Debian Server                    ├─→ Proxmox VE Host
+   │   (Mini-PC)                        │   (Tower)
+   │   ├─ Tailscale Hub                 │   ├─ LXC 103: Caddy (Reverse Proxy)
+   │   ├─ Docker Services               │   ├─ LXC 102: Vaultwarden
+   │   └─ Pi-hole                       │   ├─ CT105: PMG
+   │                                    │   └─ ZFS Storage
+   └────────────────────────────────────┘
+            │
+            ↓ Tailscale Overlay Network
+        (P2P Routing via WireGuard)
+            │
+    ┌───────┴────────────┬─────────┐
+    │                    │         │
+   Mobile Devices    Laptops   Exit-Node Clients
+  (Fedora, Phone)   (ThinkPad) (via debianserver)
+```
 
 ---
 
 ## 🔧 Kernkomponenten
 
-### 🖥️ ***Server & Storage***
+### Hardware
 
-| komponenten haupt  | Modell | Rolle | Status |
-|-----------|--------|-------|--------|
-| **Debian Server  | Lenovo Tinkcenter Mini | Zentrale Verwaltung, Services | ✅ Aktiv |
-| **Proxmox server   | Lenovo Tinkcenter Tower | Storage, Backup, Archivierung | ✅ Aktiv |
-| **Router** | AVM FritzBox | Netzwerk-Hub, DHCP, DNS | ✅ Aktiv |
+| Komponente | Modell | Funktion | Status |
+|-----------|--------|---------|--------|
+| **Debian Server** | Lenovo ThinkCentre Mini | Zentrale Services | ✅ Aktiv |
+| **Proxmox Host** | Lenovo ThinkCentre Tower | Storage, VMs, Virtualisierung | ✅ Aktiv |
+| **Router** | AVM FritzBox | DHCP, DNS, LAN-Hub | ✅ Aktiv |
+| **Admin-Laptop** | Lenovo ThinkPad | Verwaltung, Entwicklung | ✅ Aktiv |
 
-### 📱 **Mobilgeräte & Peripherie**
+### Netzwerk-Services
 
-| Gerät | Modell | Funktion | Verbindung |
-|------|--------|---------|-----------|
-| **Smartphone** | Nothing Phone 2a | Primäres mobiles Gerät | WiFi + Tailscale VPN |
-| **Kopfhörer** | Nothing Buds 2a | Audio  | Bluetooth |
-| **Smartwatch** | Xiaomi Watch | Monitoring & Alerts |   Bluetooth |
-
-### 💻 **Laptops & Workstationen**
-
-| Gerät | Modell | Zweck |
-|------|--------|-------|
-| **ThinkPad T490s** | Lenovo | Admin, Entwicklung, Management |
-
-### 🌐 **Netzwerk-Infrastruktur**
-
-| Komponente | Beschreibung |
-|-----------|------------|
-| **FritzBox 7530+** | WLAN-Router, Zentrale Netzwerkverwaltung |
-| **Netzwerk-Switches** | Switch 1 & 2 für physische Konnektivität |
-| **Tailscale Netz** | VPN-Overlay für sichere Fernverbindungen |
-| **DNS/DHCP** | Pi-hole + FritzBox hybrid Setup |
+| Service | Funktion | Zugriff |
+|---------|---------|--------|
+| **Tailscale** | VPN-Overlay (P2P WireGuard) | Verschlüsselt, Cloud-Koordination |
+| **Pi-hole** | DNS-Filter, Ad-Blocking | Local + Tailscale |
+| **Caddy** | Reverse Proxy (LXC 103) | HTTPS, automatische Zertifikate |
+| **Vaultwarden** | Self-hosted Passwortmanager | Tailscale-only |
 
 ---
 
 ## 🚀 Server & Services
 
-### 🖥️ **Debian Server Mini** - Zentrale Verwaltung
+### 📱 Debian Server (Mini-PC) – Zentrale Plattform
 
-#### System-Informationen
-- **OS**: Debian 12 (Bookworm)
-- **Rolle**: Zentrale Service-Plattform
-- **Services**: 10+ containerisierte Anwendungen
-- **Uptime-Ziel**: 99.5%
+**System:** Debian 12, ~10+ Docker-Container
 
-#### Installierte Services
+**Installierte Services:**
 
-| Service | Version | Funktion | Port | Status |
-|---------|---------|---------|------|--------|
-| **Tailscale** | Latest | VPN-Netzwerk | vpn | ✅ |
-| **Homepache** | Latest | Home Automation Dashboard | 3000 | ✅ |
-| **Pi-hole** | Latest | DNS-Filter & Ad-Blocker | 80/443 | ✅ |
-| **Ukuma** | Latest | System Monitoring | 5081 | ✅ |
-| **Glance** | Latest | Dashboard | 8080 | ✅ |
-| **Netdata** | Latest | Real-time Monitoring | 19999 | ✅ |
-| **it-tools** | Latest | IT-Utilities | 8081 | ✅ |
-| **Hermes Agent** | Latest | Automation Agent | 5000 | ✅ |
-| **Immich** | Latest | Foto/Video Management | 2283 | ✅ |
-| **ClamAV** | Latest | Antivirus Scanner | daemon | ✅ |
+| Service | Port | Funktion | Status |
+|---------|------|---------|--------|
+| Tailscale | vpn | VPN-Netzwerk, P2P-Routing | ✅ |
+| Homepage Dashboard | 3000 | Zentrale Service-Übersicht | ✅ |
+| Pi-hole | 80/443 | DNS-Filter, Ad-Blocker | ✅ |
+| Prometheus | 9091 | Metrik-Collection | ✅ |
+| Grafana | 3002 | Monitoring-Visualisierung | ✅ |
+| Loki | - | Log-Aggregation | ✅ |
+| Portainer | - | Docker-Management | ✅ |
+| Uptime Kuma | 5081 | Service-Verfügbarkeitsprüfung | ✅ |
+| Filebrowser | - | Web-basierter Datei-Manager | ✅ |
+| Forgejo | - | Self-hosted Git | ✅ |
 
-#### Service-Beschreibungen
-
-**🔐 Tailscale** (VPN-Netzwerk)
-- Sichere verschlüsselte Kommunikation zwischen Geräten
-- Ermöglicht Fernzugriff ohne Port-Forwarding
-- Zero-Trust-Netzwerk-Modell
-- Unterstützt 2FA und Device Authorization
-
-**🏠 Homepache** (Home Automation)
-- Zentrale Verwaltung von Smart-Home-Geräten
-- Systemüberwachung und Status-Dashboard
-- Automation und Regelwerk
-- Benachrichtigungen und Alerts
-
-**🚫 Pi-hole** (DNS & Security)
-- DNS-Filter und Ad-Blocker für alle Netzwerk-Geräte
-- Blockiert Malware auf DNS-Ebene
-- Zentrale DNS-Verwaltung
-- Query-Logging und Statistiken
-
-**📊 Ukuma** (System Monitoring)
-- Überwachung von CPU, RAM, Festplatte, Netzwerk
-- Systemressourcen-Management
-- Performance-Metriken in Echtzeit
-- Alerts bei Ressourcen-Engpässen
-
-**📈 Netdata** (Performance Monitoring)
-- Real-time Systemanalyse
-- Detaillierte Performance-Metriken
-- Trend-Analyse und Vorhersagen
-- Custom Alerts und Webhooks
-
-**🎨 Glance** (Dashboard)
-- Schnelle Übersicht über Systemstatus
-- Aggregate Services-Dashboard
-- Einfache Web-UI
-- Mobile-responsive Design
-
-**🛠️ it-tools** (IT-Utilities)
-- IP-Rechner und Netzwerk-Tools
-- JSON/YAML-Validator
-- Base64 Encoder/Decoder
-- Verschiedene nützliche Conversion-Tools
-
-**🤖 Hermes Agent** (Automation)
-- Automatisierung von wiederkehrenden Aufgaben
-- Inter-Service-Kommunikation
-- Task-Scheduling
-- Event-basierte Automatisierung
-
-**📸 Immich** (Media Management)
-- Self-hosted Foto- und Video-Verwaltung
-- Alternative zu Google Photos
-- Private Medienverwaltung
-- Automatische Organisation und Tagging
-
-**🦠 ClamAV** (Antivirus)
-- Malware-Scanner für das System
-- Regelmäßige Systemscans
-- Echtzeitüberwachung
-- Integr mit anderen Services
+**Key Features:**
+- Exit-Node für mobile Clients konfiguriert
+- Tailscale Subnet-Routing aktiv (LAN-Geräte erreichbar)
+- Security: iptables-Regeln auf Tailscale-only-Zugriff beschränkt
+- Nightly Backups zu Proxmox
 
 ---
 
-### 💾 **Proxmox Server (Tower)** - Storage & Backup, vms 
+### 🖥️ Proxmox VE Host (Tower) – Hypervisor & Storage
 
-#### System-Informationen
-- **OS**: Proxmox
-- **Rolle**: Zentrale Storage- & Backup-Lösung
-- **Filesystem**: ZFS mit RAID-Redundanz
-- **Kapazität**: Enterprise-Skalierbarkeit
-- **Uptime-Ziel**: 99.9%
+**System:** Proxmox VE, ZFS RAID-Pool
 
-#### Kernfunktionen
+**LXC-Container:**
 
-| Funktion | Beschreibung |
-|---------|------------|
-| **ZFS Filesystem** | Zuverlässiges FS mit Fehlertoleranz und Datenkonsistenz-Checks |
-| **RAID-Konfiguration** | Redundante Speicherung für Ausfallsicherheit |
-| **Snapshots** | Point-in-Time Backups für schnelle Recovery |
-| **Replikation** | Automatische Datenreplikation zu Backup-Zielen |
-| **Backup-Service** | Zentrale Backup-Verwaltung für alle Geräte |
-| **Storage Pool** | Verwaltete Speicherkapazität für Archivierung |
+| Container | Service | Zweck |
+|-----------|---------|-------|
+| LXC 102 | Vaultwarden | Passwortmanager |
+| LXC 103 | Caddy | Reverse Proxy + HTTPS-Termination |
+| CT105 | Proxmox Mail Gateway | Mail-Filterung |
 
-#### Backup-Strategie
+**Storage-Infrastruktur:**
+- ZFS Pool mit automatischen Snapshots
+- Tägliche inkrementelle Backups
+- Point-in-Time Recovery möglich
 
-```
-Debian Server Daten
-    ↓
-TrueNAS Backup Pool (tägliche Snapshots)
-    ↓
-Archivierung & Offline-Backup (wöchentlich)
-```
+**VMs:**
+- Debian 12 (Testing)
+- Windows 10/11 (Experimentierung)
+- FreeBSD (Netzwerk-Experimente)
+- Diverse Testsysteme
 
 ---
 
 ## 🎯 Design-Prinzipien
 
-### 🔒 **Sicherheit (Security First)**
+### 🔒 Security First
 
-**Implementierte Maßnahmen:**
-- ✅ Ende-zu-Ende Verschlüsselung mit Tailscale
-- ✅ Netzwerk-Segmentierung durch VLANs
-- ✅ Pi-hole für DNS-Sicherheit und Malware-Blocking
-- ✅ Sichere Authentifizierung (2FA/MFA wo möglich)
-- ✅ ClamAV für regelmäßige Malware-Scans
-- ✅ Firewall-Regeln auf allen Ebenen
-- ✅ Regelmäßige Security-Updates
-- ✅ Audit-Logging für kritische Operationen
+- ✅ **Verschlüsselung:** Ende-zu-Ende via Tailscale WireGuard
+- ✅ **Netzwerk-Segmentierung:** Services per iptables isoliert
+- ✅ **DNS-Sicherheit:** Pi-hole blockiert Malware-Domains
+- ✅ **VPN-Only Access:** Externe Zugriffe ausschließlich über Tailscale
+- ✅ **Monitoring:** Alle Aktivitäten geloggt & überwacht
 
-### 🧪 **Experimentierbarkeit (Innovation)**
+### 🧪 Experimentierbarkeit
 
-**Unterstützende Infrastruktur:**
-- ✅ Modulares Setup für einfaches Testen
-- ✅ Docker/Container-Deployment
-- ✅ Entwicklungs- und Produktions-Umgebungen
-- ✅ Schnelle Rollback-Mechanismen
-- ✅ Sandbox-Umgebungen für Tests
-- ✅ Version-Control für Konfigurationen
+- ✅ Modulares Setup → schnelle Iteration
+- ✅ Docker-Container → einfache Deployment-Updates
+- ✅ ZFS Snapshots → Zero-Risk Rollbacks
+- ✅ Sandbox-VMs auf Proxmox → sichere Experimente
 
-### 📈 **Skalierbarkeit (Scale Ready)**
+### 📈 Skalierbarkeit
 
-**Architektur-Features:**
-- ✅ Microservice-basierte Architektur
-- ✅ Containerisierung für leichte Portabilität
-- ✅ Load-Balancing für kritische Services
-- ✅ Horizontale Skalierbarkeit
-- ✅ Resource-Limits und Management
+- ✅ Microservice-Architektur (Docker)
+- ✅ Load-Balancing via Caddy
+- ✅ Horizontale Erweiterung möglich (mehr Container/VMs)
+- ✅ Resource-Limits pro Container
 
-### 🔄 **Ausfallsicherheit (Resilience)**
+### 🔄 Ausfallsicherheit
 
-**Implementierung:**
-- ✅ Redundante Storage-Systeme (RAID/ZFS)
-- ✅ Automatische Backups
-- ✅ Disaster-Recovery-Plan
+- ✅ RAID-Storage (Redundanz)
+- ✅ Automatische Backups (ZFS)
+- ✅ Disaster-Recovery Plan
 - ✅ Health-Checks auf kritischen Services
-- ✅ Automatische Restart-Policies
-- ✅ Monitoring & Alerting
+- ✅ Auto-Restart Policies
 
 ---
 
 ## 🚀 Deployment & Betrieb
 
-### Deployment-Prozesse
-
-#### Docker-basiertes Deployment
+### Docker-Deployment
 
 ```bash
 # Service starten
@@ -284,22 +206,12 @@ docker-compose pull
 docker-compose up -d --force-recreate
 ```
 
-#### Konfigurationsmanagement
+### Backup & Restore
 
 ```bash
-# Alle Configs sind versioniert in:
-/etc/homlap/configs/
-/etc/homlap/secrets/ (encrypted)
-```
-
-#### Backup & Restore
-
-```bash
-# Automatisches Backup (täglich um 2 Uhr nachts)
-/opt/homlap/backup/daily-backup.sh
-
+# Tägliches ZFS-Snapshot (automatisch)
 # Manuelles Backup
-/opt/homlap/backup/manual-backup.sh
+zfs snapshot tank/backup@manual-$(date +%Y%m%d)
 
 # Restore von Snapshot
 zfs rollback tank/backup@snapshot-name
@@ -307,141 +219,125 @@ zfs rollback tank/backup@snapshot-name
 
 ### Wartungs-Fenster
 
-| System | Wartung | Fenster | Häufigkeit |
-|--------|---------|--------|-----------|
-| Debian Server | Updates & Patches | Sonntag 03:00 UTC | Wöchentlich |
-| TrueNAS | Scrub & Maintenance | Samstag 02:00 UTC | Monatlich |
-| Network | Firmware-Updates | Nach Bedarf | Ad-hoc |
+| System | Wartung | Frequenz |
+|--------|---------|----------|
+| Debian Server | Updates & Patches | Wöchentlich (Sonntag 03:00 UTC) |
+| Proxmox | Scrub & Maintenance | Monatlich (Samstag 02:00 UTC) |
+| Network | Firmware-Updates | Nach Bedarf |
 
 ---
 
 ## 🔐 Sicherheitskonzept
 
-### Sicherheits-Layer
+### 4-Layer-Ansatz
 
-#### Layer 1: Netzwerk-Sicherheit
+**Layer 1: Netzwerk-Sicherheit**
 - Firewall-Regeln (UFW auf Debian, FritzBox)
 - VPN-Only Zugriff von außen
 - Port-Whitelisting
-- DDoS-Protection
+- Tailscale ACLs
 
-#### Layer 2: Service-Sicherheit
-- Service-Isolation (Docker/Container)
+**Layer 2: Service-Sicherheit**
+- Service-Isolation via Docker/Container
 - Resource-Limits
 - Security-Scanning (ClamAV)
-- Regelmäßige Patching
+- Regelmäßige Patches
 
-#### Layer 3: Daten-Sicherheit
+**Layer 3: Daten-Sicherheit**
 - Verschlüsselte Backups
-- ZFS Checksums
+- ZFS Checksums (Bit-Rot-Detection)
 - RAID-Redundanz
-- Geo-redundante Backups (geplant)
+- Snapshot-Replikation
 
-#### Layer 4: Zugriffs-Kontrolle
-- 2FA/MFA für kritische Services
-- Role-Based Access Control (RBAC)
-- API-Keys mit Expiration
+**Layer 4: Zugriffs-Kontrolle**
+- Tailscale Device Authorization
+- Local SSH-Keys
 - Audit-Logging
-
-### Threat-Model
-
-| Threat | Mitigation | Status |
-|--------|-----------|--------|
-| Unbefugter Zugriff | Tailscale VPN + 2FA | ✅ Implementiert |
-| Malware-Infizierung | ClamAV + Netzwerk-Segmentierung | ✅ Implementiert |
-| Datenverlust | RAID/ZFS + Backups | ✅ Implementiert |
-| Netzwerk-Angriffe | Firewall + DoS-Protection | ✅ Implementiert |
-| Service-Ausfälle | Health-Checks + Auto-Restart | ✅ Implementiert |
+- Sudo-Password-Schutz
 
 ---
 
-## 📊 Monitoring & Wartung
+## 📚 Lessons Learned
 
-### Monitoring-Stack
+Siehe auch: [LESSONS_LEARNED.md](LESSONS_LEARNED.md)
 
-```
-Netdata (Real-time Metrics)
-    ↓
-Ukuma (Visualization)
-    ↓
-Glance (Dashboard)
-    ↓
-Alerts (Hermes Agent)
-```
+### Top 5 Erkenntnisse
 
-### Key Metrics
+1. **GitHub-Releases & Versionierung**
+   - ❌ Nie Versionsnummern hartkodieren
+   - ✅ Immer dynamisch per GitHub API ermitteln
+   - ⚠️ Downloads mit Dateigröße validieren (404-Fehler erkennen)
 
-| Metrik | Target | Alert-Level | Status |
-|--------|--------|-------------|--------|
-| CPU Usage | < 80% | > 90% | 📊 Tracked |
-| Memory Usage | < 80% | > 90% | 📊 Tracked |
-| Disk Space | < 80% | > 90% | 📊 Tracked |
-| Network Latency | < 50ms | > 100ms | 📊 Tracked |
-| Service Health | 100% | < 95% | 📊 Tracked |
+2. **Tailscale Exit-Node**
+   - ❌ Sinnlos für Geräte im gleichen Heimnetz
+   - ✅ Nur für mobile/externe Clients relevant
+   - 💡 IPv6-Präferenz beachten (`curl -4 ifconfig.me`)
 
-### Backups & Recovery
+3. **Port-Konflikte**
+   - ✅ Immer zuerst `ss -tulpn` prüfen
+   - ✅ Config-Debugging ist Zeitverschwendung, wenn Port besetzt ist
 
-**Backup-Zeitplan:**
-- Tägliche inkrementelle Backups (02:00 UTC)
-- Wöchentliche vollständige Backups (Samstag 02:00 UTC)
-- Monatliche Archive (1. des Monats 03:00 UTC)
+4. **Headscale Self-Hosting**
+   - ⏸️ Nice-to-have, aber optional
+   - ✅ Cloud-Koordination (tailscale.com) reicht aus
+   - 💡 Datenverkehr läuft ohnehin P2P lokal
 
-**Recovery-Zeiten (RTO/RPO):**
-- RTO (Recovery Time Objective): < 1 Stunde
-- RPO (Recovery Point Objective): < 24 Stunden
+5. **LAN-Konnektivität zwischen Servern**
+   - ⚠️ Hardware-Probleme → vorab testen mit `ping`
+   - ✅ Fallback auf Tailscale-IPs immer haben
+   - 📝 Netzwerk-Defekte dokumentieren
 
 ---
 
 ## ✅ Nächste Schritte
 
-### 🔄 In Planung
+### 🔄 Kurzfristig (nächste 1-3 Monate)
 
-- [ ] Ansible Playbooks für vollständige Infrastruktur-Automation
-- [ ] Terraform Code für IaC (Infrastructure as Code)
+- [ ] Headscale-Versuch wieder aufgreifen (Port-Konflikt lösen)
+- [ ] Ansible Playbooks für Infrastruktur-Automation
+- [ ] Disaster-Recovery Test durchführen
+- [ ] IPv6-Support optimieren
 - [ ] CI/CD Pipeline für Service-Deployments
-- [ ] Kubernetes Migration (längerfristig)
-- [ ] Geo-redundante Backups zu Cloud-Provider
-- [ ] API-Dokumentation für alle Services
-- [ ] Runbook-Dokumentation für häufige Probleme
-- [ ] Load-Balancing für redundante Services
-- [ ] Container-Registry für Custom-Images
-- [ ] Incident-Response-Plan
 
-### 🚀 Mittelfristig
+### 🚀 Mittelfristig (3-6 Monate)
+
+- [ ] Kubernetes Migration evaluieren
+- [ ] Geo-redundante Backups (Cloud-Provider)
+- [ ] Service-Mesh (Istio/Linkerd)
+- [ ] Advanced Monitoring (Prometheus + Grafana erweitern)
+- [ ] Zero-Trust Model vollständig implementieren
+
+### 🌟 Langfristig (6+ Monate)
 
 - [ ] Multi-Node Kubernetes Cluster
-- [ ] Service-Mesh (Istio/Linkerd)
-- [ ] Advanced Monitoring & Alerting (Prometheus + Grafana)
 - [ ] GitOps Workflow (ArgoCD)
-- [ ] Zero-Trust Security Model vollständig
-- [ ] DR-Site für Disaster-Recovery
-
-### 🌟 Langfristig
-
-- [ ] Vollständige Cloud-Integration
-- [ ] Multi-Region Setup
-- [ ] Enterprise-Grade Compliance (GDPR, etc.)
-- [ ] Advanced AI/ML Monitoring
+- [ ] Enterprise-Grade Compliance (GDPR)
+- [ ] ML-basierte Anomalie-Detection
 
 ---
 
 ## 📚 Ressourcen
 
 ### 📖 Dokumentation
+
 - [Tailscale Docs](https://tailscale.com/kb/)
-- [TrueNAS Documentation](https://www.truenas.com/docs/)
-- [Pi-hole Documentation](https://docs.pi-hole.net/)
-- [Netdata Documentation](https://learn.netdata.cloud/)
+- [Proxmox VE Documentation](https://pve.proxmox.com/wiki/)
+- [Debian Documentation](https://www.debian.org/doc/)
+- [Pi-hole Docs](https://docs.pi-hole.net/)
+- [Grafana Documentation](https://grafana.com/docs/)
+
+### 📄 Interne Docs
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) – Detaillierte Architektur
+- [SERVICES.md](SERVICES.md) – Service-Übersicht & Konfiguration
+- [LESSONS_LEARNED.md](LESSONS_LEARNED.md) – Lessons aus 7 Phasen
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) – Häufige Probleme
 
 ### 🔗 Links
-- **Repository**: https://github.com/Hoinkkoma/homlap-
-- **Netzwerk-Diagramme**: `homlao.drawio`
-- **License**: Apache License 2.0
 
-### 👤 Kontakt & Support
-- **Maintainer**: Hoinkkoma
-- **Status**: Aktive Entwicklung
-- **Letztes Update**: 2026-06-09
+- **Repository:** https://github.com/Hoinkkoma/homlap-
+- **Netzwerk-Diagramme:** `homlao.drawio`
+- **Lizenz:** Apache License 2.0
 
 ---
 
@@ -451,4 +347,6 @@ Dieses Projekt ist unter der **Apache License 2.0** lizenziert. Siehe [LICENSE](
 
 ---
 
-**Made with ❤️ for home automation and self-hosting**
+**Made with ❤️ for self-hosting, privacy & continuous learning**
+
+Zuletzt aktualisiert: Juli 2026
