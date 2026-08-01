@@ -1,242 +1,439 @@
-# Homelab Doku
-moin moin das ist die doku meines homlaps 
-## Übersicht
+# 🏠 Hoinkkoma Homelab Dokumentation
 
-Dieses Homelab ist in zwei Hauptbereiche aufgeteilt:
+Moin moin 👋
+dies ist die Dokumentation meines Homelabs.
 
-- **Debian Monitoring Server** – Verwaltung, Monitoring und zentrale Überwachung
-- **Proxmox Server** – Hosting der produktiven Dienste (VMs, LXC, Docker)
+Das Homelab ist in zwei Hauptbereiche aufgeteilt:
 
-Als zentrale Anlaufstelle dient das "Homepage"-Dashboard (gethomepage), das Links und Statusinformationen zu allen Diensten bündelt.
+* **Debian Monitoring Server** → Verwaltung, Monitoring und zentrale Überwachung
+* **Proxmox Server** → Hosting der produktiven Dienste (VMs, LXC, Docker)
 
----
-
-## Architektur (Übersicht)
-
-                     Internet
-                         |
-                      Router
-                         |
-                    Tailscale VPN
-                         |
-          +--------------+--------------+
-          |                             |
-   Debian Monitoring Server       Proxmox Server
-   Verwaltung / Überwachung       Dienste / Anwendungen
-          |                             |
-  Prometheus                       Docker / VMs / LXC
-  Grafana                          Portainer
-  Loki                             Jellyfin
-  Uptime Kuma                      Forgejo
-  Scrutiny                         FileBrowser
-                                   Vaultwarden
+Als zentrale Anlaufstelle dient das **Homepage Dashboard (gethomepage)**.
+Dort werden alle Dienste, Links und Statusinformationen gebündelt.
 
 ---
 
-## Server 1 — Debian Monitoring Server
+# Architektur Übersicht
 
-Zweck:
-
-- Zentrale Management- und Monitoring-Plattform für das Homelab
-- Sammlung, Visualisierung und Langzeitspeicherung von Metriken
-- Zentrale Logverwaltung, Dashboarding und Serviceüberwachung
-
-Netzwerkadresse:
-
+```text
+                         Internet
+                             |
+                          Router
+                             |
+                       Tailscale VPN
+                             |
+              +--------------+--------------+
+              |                             |
+              |                             |
+ Debian Monitoring Server              Proxmox Server
+ Verwaltung / Überwachung             Dienste / Anwendungen
+              |                             |
+              |                             |
+       Prometheus                    Docker / VMs / LXC
+       Grafana                       Portainer
+       Loki                          Jellyfin
+       Uptime Kuma                   Forgejo
+       Scrutiny                      FileBrowser
+                                     Vaultwarden
 ```
-100.113.28.9
-```
-
-Verwaltung:
-
-```
-Cockpit: https://100.113.28.9:9090
-```
-
-Kernfunktionen:
-
-- Systemverwaltung und Updates
-- Diensteverwaltung und Logs
-- Metrik-Sammlung (Prometheus)
-- Visualisierung (Grafana)
-- Log-Aggregation (Loki)
-- Service-Checks / Erreichbarkeitsmonitoring (Uptime Kuma)
-- SMART-Überwachung (Scrutiny)
 
 ---
 
-### Monitoring-Dienste (Debian)
+# 🖥 Server 1 — Debian Monitoring Server
 
-Grafana
+## Zweck
 
-- URL: `http://100.113.28.9:3002`
-- Aufgabe: Visualisierung, Dashboards, Alerts (gegebenenfalls über Alertmanager)
+Der Debian Server ist die zentrale Management- und Monitoring-Plattform.
 
-Prometheus
+Aufgaben:
 
-- URL: `http://100.113.28.9:9091`
-- Aufgabe: Sammlung von Metriken (Debian, Proxmox, Container)
+* Überwachung aller Systeme
+* Sammlung und Speicherung von Metriken
+* Visualisierung über Dashboards
+* zentrale Logverwaltung
+* Überwachung der Dienste
+* Verwaltung des Homelabs
 
-Loki
+## Netzwerk
 
-- URL: `http://100.113.28.9:3100`
-- Aufgabe: Zentrale Logspeicherung, Suche und Analyse von Logs
+```text
+IP: 100.113.28.9
+```
 
-Uptime Kuma
+## Verwaltung
 
-- URL: `http://100.113.28.9:3001`
-- Aufgabe: Verfügbarkeitstests (HTTP, TCP, ICMP, Portchecks)
+Cockpit:
 
-Scrutiny
-
-- URL: `http://100.113.28.9:8085`
-- Aufgabe: SMART-Monitoring für Festplatten (Zustand, Fehler, Lebensdauer)
+```text
+https://100.113.28.9:9090
+```
 
 ---
 
-## Server 2 — Proxmox Server
+# Monitoring Dienste (Debian)
 
-Zweck:
+## Grafana
 
-- Plattform für VMs, LXC-Container und produktive Dienste
-- Verwaltung von Storage, Netzwerk und Ressourcen für gehostete Dienste
+URL:
 
-Netzwerkadresse:
-
-```
-100.83.105.59
+```text
+http://100.113.28.9:3002
 ```
 
-Weboberfläche:
+Aufgabe:
 
+* Dashboards
+* Visualisierung der Metriken
+* Auswertung von Systemdaten
+* zukünftige Alarmierungen
+
+---
+
+## Prometheus
+
+URL:
+
+```text
+http://100.113.28.9:9091
 ```
+
+Aufgabe:
+
+* Sammlung von Metriken
+* Zeitreihendatenbank
+* Überwachung von:
+
+  * Debian Server
+  * Proxmox Server
+  * Docker Containern
+
+---
+
+## Loki
+
+URL:
+
+```text
+http://100.113.28.9:3100
+```
+
+Aufgabe:
+
+* zentrale Speicherung von Logs
+* Fehleranalyse
+* Suche und Auswertung von Systemereignissen
+
+---
+
+## Uptime Kuma
+
+URL:
+
+```text
+http://100.113.28.9:3001
+```
+
+Aufgabe:
+
+Überwachung der Erreichbarkeit:
+
+* HTTP
+* TCP
+* ICMP
+* Ports
+* Dienste
+
+---
+
+## Scrutiny
+
+URL:
+
+```text
+http://100.113.28.9:8085
+```
+
+Aufgabe:
+
+SMART-Festplattenüberwachung:
+
+* SSD Zustand
+* HDD Zustand
+* Fehlererkennung
+* Lebensdauerüberwachung
+
+---
+
+# 🖥 Server 2 — Proxmox Server
+
+## Zweck
+
+Der Proxmox Server stellt die Plattform für alle produktiven Dienste bereit.
+
+Aufgaben:
+
+* virtuelle Maschinen
+* LXC Container
+* Docker Dienste
+* Storage Verwaltung
+* Netzwerkverwaltung
+
+## Netzwerk
+
+```text
+IP: 100.83.105.59
+```
+
+## Webinterface
+
+```text
 https://100.83.105.59:8006
 ```
 
 ---
 
-### Auf dem Proxmox-Server gehostete Dienste
+# Dienste auf Proxmox
 
-Portainer
+## Portainer
 
-- URL: `http://100.83.105.59:9000`
-- Aufgabe: Verwaltung von Docker-Containern, Images, Netzwerken und Volumes
+URL:
 
-Jellyfin
-
-- URL: `http://100.83.105.59:8096`
-- Aufgabe: Medienserver für Filme, Serien und Musik
-
-Forgejo
-
-- URL: `http://100.83.105.59:3030`
-- Aufgabe: Self-hosted Git-Server (Code, Konfigurationen, Backups)
-
-FileBrowser
-
-- URL: `http://100.83.105.59:8082`
-- Aufgabe: Webbasierte Dateiverwaltung
-
-Vaultwarden
-
-- URL: `https://192.168.178.88:8000`
-- Aufgabe: Privater Passwort-Manager (achten: lokale IP, ggf. Tailscale-Zugriff benötigen)
-
----
-
-## Netzwerkkomponenten
-
-Pi-hole
-
-- Aufgabe: DNS-Filterung und Werbeblocker im lokalen Netzwerk
-
-Tailscale
-
-- Aufgabe: VPN-Lösung für sicheren Fernzugriff und Vernetzung der Homelab-Geräte
-
-Hinweis: Tailscale ermöglicht sicheren Zugriff auf interne Dienste von außen, unter Beachtung von ACLs und Expose-Settings.
-
----
-
-## Homepage Dashboard
-
-Das Homepage-Dashboard bündelt Links und Statusinformationen zu allen Bereichen des Homelabs. Empfohlene Struktur:
-
-- Homelab
-  - Monitoring (Grafana, Prometheus, Loki, Uptime Kuma, Scrutiny)
-  - Proxmox (Proxmox Web, Portainer, Jellyfin, Forgejo, FileBrowser)
-  - Netzwerk (Pi-hole, Tailscale)
-  - Verwaltung (Cockpit, GitHub Dokumentation)
-
----
-
-## Dokumentation & Backup
-
-Die Dokumentation wird in diesem Repository verwaltet (README und thematische Unterordner):
-
+```text
+http://100.83.105.59:9000
 ```
+
+Aufgabe:
+
+Docker Verwaltung:
+
+* Container
+* Images
+* Netzwerke
+* Volumes
+
+---
+
+## Jellyfin
+
+URL:
+
+```text
+http://100.83.105.59:8096
+```
+
+Aufgabe:
+
+Medienserver:
+
+* Filme
+* Serien
+* Musik
+* Streaming
+
+---
+
+## Forgejo
+
+URL:
+
+```text
+http://100.83.105.59:3030
+```
+
+Aufgabe:
+
+Self-hosted Git Server:
+
+* Quellcode
+* Konfigurationen
+* Backups
+* Dokumentation
+
+---
+
+## FileBrowser
+
+URL:
+
+```text
+http://100.83.105.59:8082
+```
+
+Aufgabe:
+
+Webbasierte Dateiverwaltung.
+
+---
+
+## Vaultwarden
+
+URL:
+
+```text
+https://192.168.178.88:8000
+```
+
+Aufgabe:
+
+Privater Passwortmanager.
+
+Hinweis:
+
+Der Dienst befindet sich aktuell auf einer lokalen IP und benötigt gegebenenfalls Zugriff über Tailscale oder lokales Netzwerk.
+
+---
+
+# Netzwerk
+
+## Pi-hole
+
+Aufgabe:
+
+* DNS Filter
+* Werbeblocker
+* lokale DNS Verwaltung
+
+---
+
+## Tailscale
+
+Aufgabe:
+
+VPN Netzwerk für:
+
+* sicheren Fernzugriff
+* Verbindung der Homelab Systeme
+* Zugriff auf interne Dienste
+
+---
+
+# Homepage Dashboard
+
+Das Homepage Dashboard ist die zentrale Übersicht.
+
+Struktur:
+
+```text
+Homelab
+
+├── Monitoring Debian
+│   ├── Grafana
+│   ├── Prometheus
+│   ├── Loki
+│   ├── Uptime Kuma
+│   └── Scrutiny
+│
+├── Proxmox
+│   ├── Proxmox Web
+│   ├── Portainer
+│   ├── Jellyfin
+│   ├── Forgejo
+│   └── FileBrowser
+│
+├── Netzwerk
+│   ├── Pi-hole
+│   └── Tailscale
+│
+└── Verwaltung
+    ├── Cockpit
+    └── GitHub Dokumentation
+```
+
+---
+
+# Dokumentation & Backup
+
+Die Dokumentation wird über Git verwaltet.
+
+Struktur:
+
+```text
 README.md
-└── Netzwerk/
-└── Proxmox/
-└── Debian-Monitoring/
-└── Docker/
-└── Wartung/
-└── Fehlerbehebung/
+
+├── Netzwerk
+├── Proxmox
+├── Debian-Monitoring
+├── Docker
+├── Wartung
+└── Fehlerbehebung
 ```
 
-Backup-Strategie (Empfehlung):
+---
 
-- Regelmäßige, automatisierte Backups der wichtigen VMs/Container (z.B. Proxmox Backup Server)
-- Versionskontrolle für Konfigurationsdateien (Forgejo / Git)
-- Offsite-Backups kritischer Daten
-- Testen der Wiederherstellung in definierten Intervallen
+# Backup Strategie
+
+Geplant:
+
+* regelmäßige VM/LXC Backups
+* Proxmox Backup Server
+* Versionskontrolle über Git
+* Offsite Backup wichtiger Daten
+* regelmäßige Wiederherstellungstests
 
 ---
 
-## Geplante Erweiterungen
+# Geplante Erweiterungen
 
-Monitoring
+## Monitoring
 
-- Alertmanager (Prometheus Alerting)
-- Node Exporter (weitere Host-Metriken)
-- Proxmox Exporter
-- Blackbox Exporter (externes Uptime-Monitoring)
+* Alertmanager
+* Node Exporter
+* Proxmox Exporter
+* Blackbox Exporter
 
-Infrastruktur
+## Infrastruktur
 
-- Proxmox Backup Server
-- Automatisierte Backup-Pipelines
-- Verbesserte Alarmierung und On-Call-Prozesse
+* Proxmox Backup Server
+* automatisierte Backups
+* bessere Alarmierung
 
-Verwaltung
+## Verwaltung
 
-- Automatisierte Updates (Staging → Prod)
-- Zentrales Configuration Management (z. B. Ansible)
-
----
-
-## Wartung (regelmäßig)
-
-- Docker-Container aktualisieren
-- Proxmox-Updates installieren und überprüfen
-- Backup-Logs und Integrität prüfen
-- SMART-Werte prüfen (Scrutiny)
-- Monitoring-Dashboards und Alerts prüfen
-- Berechtigungen und Zertifikate erneuern
+* automatische Updates
+* Ansible Configuration Management
 
 ---
 
-## Verantwortlichkeiten & Kontakt
+# Wartung
 
-- Repo / Dokumentation: Hoinkkoma
-- Administration: Betreiber des Homelabs (bei Fragen: per Git Issue im Forgejo / Git-Repo dokumentieren)
+Regelmäßig prüfen:
+
+* Docker Container Updates
+* Proxmox Updates
+* Backup Status
+* SMART Werte
+* Monitoring Dashboards
+* Zertifikate
+* Berechtigungen
 
 ---
 
-## Letzte Aktualisierung
+# Verantwortlichkeiten
 
+Repository:
+
+```text
+Hoinkkoma Homelab
+```
+
+Administration:
+
+```text
+Betreiber des Homelabs
+```
+
+Änderungen:
+
+* über Git Commits
+* Pull Requests
+* Dokumentierte Änderungen
+
+---
+
+# Letzte Aktualisierung
+
+```text
 2026-08-01
+```
 
----
-
-Hinweis: Diese Dokumentation ist als lebendes Dokument gedacht. Für Änderungen bitte Pull Requests (oder in Forgejo entsprechende Änderungen) nutzen und Versionierung beibehalten.
+Diese Dokumentation ist ein lebendes Dokument und wird mit dem Ausbau des Homelabs erweitert.
