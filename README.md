@@ -1,5 +1,5 @@
-# Homelab Dokumentation
-
+# Homelab Doku
+moin moin das ist die doku meines homlaps 
 ## Übersicht
 
 Dieses Homelab ist in zwei Hauptbereiche aufgeteilt:
