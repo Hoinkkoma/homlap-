@@ -57,7 +57,7 @@ Aufgaben:
 ## Netzwerk
 
 ```text
-IP: 100.113.28.9
+IP: [REDACTED_IP]
 ```
 
 ## Verwaltung
@@ -65,7 +65,7 @@ IP: 100.113.28.9
 Cockpit:
 
 ```text
-https://100.113.28.9:9090
+https://[REDACTED_IP]:9090
 ```
 
 ---
@@ -77,7 +77,7 @@ https://100.113.28.9:9090
 URL:
 
 ```text
-http://100.113.28.9:3002
+http://[REDACTED_IP]:3002
 ```
 
 Aufgabe:
@@ -94,7 +94,7 @@ Aufgabe:
 URL:
 
 ```text
-http://100.113.28.9:9091
+http://[REDACTED_IP]:9091
 ```
 
 Aufgabe:
@@ -114,7 +114,7 @@ Aufgabe:
 URL:
 
 ```text
-http://100.113.28.9:3100
+http://[REDACTED_IP]:3100
 ```
 
 Aufgabe:
@@ -130,7 +130,7 @@ Aufgabe:
 URL:
 
 ```text
-http://100.113.28.9:3001
+http://[REDACTED_IP]:3001
 ```
 
 Aufgabe:
@@ -150,7 +150,7 @@ Aufgabe:
 URL:
 
 ```text
-http://100.113.28.9:8085
+http://[REDACTED_IP]:8085
 ```
 
 Aufgabe:
@@ -181,13 +181,13 @@ Aufgaben:
 ## Netzwerk
 
 ```text
-IP: 100.83.105.59
+IP: [REDACTED_IP]
 ```
 
 ## Webinterface
 
 ```text
-https://100.83.105.59:8006
+https://[REDACTED_IP]:8006
 ```
 
 ---
@@ -199,7 +199,7 @@ https://100.83.105.59:8006
 URL:
 
 ```text
-http://100.83.105.59:9000
+http://[REDACTED_IP]:9000
 ```
 
 Aufgabe:
@@ -218,7 +218,7 @@ Docker Verwaltung:
 URL:
 
 ```text
-http://100.83.105.59:8096
+http://[REDACTED_IP]:8096
 ```
 
 Aufgabe:
@@ -237,7 +237,7 @@ Medienserver:
 URL:
 
 ```text
-http://100.83.105.59:3030
+http://[REDACTED_IP]:3030
 ```
 
 Aufgabe:
@@ -256,7 +256,7 @@ Self-hosted Git Server:
 URL:
 
 ```text
-http://100.83.105.59:8082
+http://[REDACTED_IP]:8082
 ```
 
 Aufgabe:
@@ -270,7 +270,7 @@ Webbasierte Dateiverwaltung.
 URL:
 
 ```text
-https://192.168.178.88:8000
+https://[REDACTED_IP]:8000
 ```
 
 Aufgabe:
