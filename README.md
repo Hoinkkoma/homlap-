@@ -351,8 +351,8 @@ Struktur:
 README.md
 
 ├── Netzwerk
-├── Proxmox
 ├── Debian-Monitoring
+├── Proxmox
 ├── Docker
 ├── Wartung
 └── Fehlerbehebung
