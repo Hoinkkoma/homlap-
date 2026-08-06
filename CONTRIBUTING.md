@@ -1,6 +1,6 @@
 # ✨ Contributing
 
-Danke, dass du zum Hoinkkoma Homelab Repo beitragen möchtest! Hier ein kurzer Leitfaden mit Emojis, damit alles schön übersichtlich bleibt.
+Danke, dass du zum meiner Homelab Repo beitragen möchtest! Hier ein kurzer Leitfaden mit Emojis, damit alles schön übersichtlich bleibt.
 
 ## 🧭 Ablauf
 
