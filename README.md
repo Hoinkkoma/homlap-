@@ -23,6 +23,7 @@ in der alles kurtz zusammen gefast ist
    
 was--Geräte-drinn-sind
  **Geräte**
+ 
    -*Proxmox tinkchenter Tower pc*
    -*Debian server  Mini pc*
    -*Digitus Print Server*
