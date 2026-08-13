@@ -23,7 +23,7 @@ in der alles kurtz zusammen gefast ist
    
 ## Alle Geräte
 
-Hier ist eine bereinigte Liste der vorhandenen Geräte im Homelab.
+Liste der vorhandenen Geräte im Homelab.
 
 | Gerät | Typ | Standort / Notizen |
 |---|---:|---|
