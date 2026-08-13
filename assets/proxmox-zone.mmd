@@ -1,0 +1,7 @@
+%% assets/proxmox-zone.mmd
+flowchart LR
+  Proxmox[Proxmox Host]\n  Proxmox --> VM_PRINT[print-vm (Debian/CUPS)]
+  Proxmox --> VM_MON[Debian Monitoring]
+  Proxmox --> Docker[Docker / Portainer (Apps)]
+  VM_PRINT --> Digitus[switch / Digitus on Host]
+  Digitus --> HP[HP OfficeJet 4558]

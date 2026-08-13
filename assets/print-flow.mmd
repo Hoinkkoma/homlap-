@@ -1,0 +1,13 @@
+%% assets/print-flow.mmd
+sequenceDiagram
+  participant Homepage
+  participant PrintWorker
+  participant CUPS as print-vm (CUPS)
+  participant Digitus
+  participant HP as HP_OfficeJet_4558
+
+  Homepage->>PrintWorker: PDF per HTTP POST /dropzone
+  PrintWorker->>CUPS: lp -d PRINTER file.pdf
+  CUPS->>Digitus: socket://digitus:9100 (raw/JetDirect)
+  Digitus->>HP: USB → Druck
+  CUPS-->>PrintWorker: Jobstatus (completed/failed)
