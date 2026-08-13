@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="260" viewBox="0 0 900 260">
+  <style>
+    .title { font: bold 16px sans-serif; }
+    .node { font: 13px sans-serif; }
+    .box { fill: #f7f7f7; stroke: #888; }
+    .arrow { stroke: #333; stroke-width: 2; fill: none; }
+  </style>
+  <text x="10" y="20" class="title">Network Zones — High Level</text>
+
+  <rect x="10" y="40" width="200" height="60" class="box" />
+  <text x="20" y="75" class="node">Management Zone\n(Debian Monitoring)</text>
+
+  <rect x="240" y="40" width="200" height="60" class="box" />
+  <text x="250" y="75" class="node">Services Zone\n(Apps)</text>
+
+  <rect x="470" y="40" width="200" height="60" class="box" />
+  <text x="480" y="75" class="node">Print Zone\n(print‑vm, Digitus)</text>
+
+  <rect x="700" y="40" width="180" height="60" class="box" />
+  <text x="710" y="75" class="node">Guest / IoT Zone</text>
+
+  <path class="arrow" d="M210 70 L240 70" marker-end="url(#arrow)" />
+  <path class="arrow" d="M440 70 L470 70" marker-end="url(#arrow)" />
+  <path class="arrow" d="M670 70 L700 70" marker-end="url(#arrow)" />
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333" />
+    </marker>
+  </defs>
+
+  <text x="10" y="130" class="node">Notes:</text>
+  <text x="10" y="150" class="node">- Management: Prometheus, Grafana, Loki, Uptime Kuma</text>
+  <text x="10" y="170" class="node">- Services: Jellyfin, Forgejo, FileBrowser, Vaultwarden, Immich</text>
+  <text x="10" y="190" class="node">- Print: CUPS print‑vm, Digitus printserver (fixed IP, restrict access)</text>
+</svg>
