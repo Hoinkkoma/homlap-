@@ -2,7 +2,7 @@
 
 **Letzte Aktualisierung:** 2026-08-13
 
-Hey — willkommen zur Homelab-Doku. Hier steht kurz und klar, was läuft, wie die Sachen verbunden sind und wie du das Druck-Setup (HP OfficeJet 4558 über Digitus) betreibst.
+moin — willkommen zur Homelab-Doku. Hier steht kurz und klar, was läuft, wie die Sachen verbunden sind und wie du das Druck-Setup (HP OfficeJet 4558 über Digitus) betreibst.
 
 Kurzüberblick
 
@@ -18,7 +18,7 @@ Schnellstart (wenn du nur drucken willst)
 
 Hinweis zur Verkabelung (aktualisiert)
 
-- Der Digitus Printserver ist nicht über einen separaten Switch mit dem Netzwerk verbunden — er sitzt direkt an einem zweiten LAN‑Port des Proxmox Hosts. Der Host führt das Traffic‑Routing/Bridging zur VM durch (z. B. via vmbr1), sodass die print‑vm den Digitus per Hostname/Bridge erreichen kann.
+- Der Digitus Printserver ist nicht über einen separaten Switch mit dem Netzwerk verbunden — er sitzt direkt an einem zweiten LAN‑Port des Proxmox Hosts. Der Host führt das Traffic‑Routing[...]
 
 Wichtige Links in diesem Repo
 
@@ -30,7 +30,7 @@ Wichtige Links in diesem Repo
 
 Was du als Admin wissen solltest
 
-- Wenn der Digitus an einen zweiten NIC am Proxmox Host angeschlossen ist, muss dieser NIC in eine Bridge (z. B. vmbr1) eingebunden werden oder geroutet sein, damit die print‑vm den Digitus erreichen kann.
+- Wenn der Digitus an einen zweiten NIC am Proxmox Host angeschlossen ist, muss dieser NIC in eine Bridge (z. B. vmbr1) eingebunden werden oder geroutet sein, damit die print‑vm den Digitus erre[...]
 - Alternativ kann der Proxmox Host IP‑Forwarding übernehmen und lokale Firewall‑Regeln setzen; in der Doku findest du Beispiele und Empfehlungen.
 
-Wenn du willst, passe ich die kurzen Konfig‑Snippets in Proxmox/printer-vm.md an (Beispiel: wie man vmbr1 anlegt und eine VM an diese Bridge hängt). Sag kurz „Snippets anpassen“, dann übernehme ich es.
+Wenn du willst, passe ich die kurzen Konfig‑Snippets in Proxmox/printer-vm.md an (Beispiel: wie man vmbr1 anlegt und eine VM an diese Bridge hängt). Sag kurz „Snippets anpassen“, dann über...
