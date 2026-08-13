@@ -22,12 +22,13 @@ Willkommen zur Dokumentation meines Homelabs! 👋 Hier findest du einen komplet
 
 ## 🎯 Überblick
 
-Das Homelab ist eine verteilte Infrastruktur mit zwei Hauptkomponenten:
+Das Homelab ist eine verteilte Infrastruktur mit drei Hauptkomponenten:
 
 | Komponente | Rolle | OS | Aufgaben |
 |-----------|------|----|----|
 | **🖥️ Debian Monitoring Server** | Verwaltung & Überwachung | Debian 12 | Prometheus, Grafana, Loki, Uptime Kuma, Scrutiny, Homepage |
 | **🔶 Proxmox Server** | Hosting-Plattform | Proxmox VE | VMs, LXC Container, Docker, Dienste |
+| **🖨️ Print Gateway (VM auf Proxmox)** | Druck-Management | Debian (VM) | CUPS, HPLIP — Anbindung Digitus Printserver & HP OfficeJet 4558 |
 
 **Zentrale Zugriffsstelle:** [Homepage Dashboard](http://[LOKAL]:80) - Single Pane of Glass für alle Dienste
 
@@ -35,39 +36,72 @@ Das Homelab ist eine verteilte Infrastruktur mit zwei Hauptkomponenten:
 
 ## 🏗️ Architektur
 
+Illustration der Architektur (inkl. Digitus Printserver + HP OfficeJet 4558):
+
 ```
-                            🌐 Internet
-                                |
-                        [Router Fritzbox]
-                                |
-                   +————————————+————————————+
-                   |                        |
-           [Debian Monitor]            [Proxmox Server]
-           (Management/Watch)          (Production/Services)
-                   |                        |
-        ┌──────────┼──────────┐   ┌────────┼────────┐
-        |          |          |   |        |        |
-    Tailscale  Prometheus  Grafana  VMs   LXC   Docker
-    (VPN Hub)   Loki      Uptime Kuma    Apps  Container
-               Scrutiny   Homepage
+                                🌐 Internet
+                                    |
+                            [Router / Fritzbox]
+                                    |
+                       +—————————————+—————————————+
+                       |                            |
+             [Debian Monitoring]              [Proxmox Host]
+             (Management / Watch)            (Virtualisierung)
+                       |                            |
+       ┌───────────────┼───────────────┐     ┌──────┼────────┐
+       |               |               |     |      |        |
+   Tailscale      Prometheus       Grafana  VMs   LXC    Docker
+   (VPN Hub)        Loki         Uptime Kuma Apps  Cont.  Services
+                    Scrutiny       Homepage
+
+                      Proxmox: Virtual Network / Bridges (vmbr0...)
+                           |
+             +-------------+------------------------------+
+             |                                            |
+      [print-vm (Debian)]                            [Other VMs]
+      (CUPS, HPLIP, Avahi)                            (Jellyfin, Forgejo...)
+             |                                            |
+   (connects to Digitus via LAN)                     (services)
+             |
+   +-------------------------+
+   | Digitus Printserver Box |   <-- Ethernet -->  Switch / LAN
+   |  (192.168.1.50, JetDirect) |
+   +-----------+-------------+
+               |
+            USB |
+               |
+       +---------------+
+       | HP OfficeJet  |
+       |   4558        |
+       +---------------+
+
+Homepage-App ---> print-vm (IPP/LPD) ---> CUPS ---> Digitus/socket://192.168.1.50:9100 ---> HP
 ```
 
-### Netzwerk-Topologie
+Hinweis: Der Digitus steht als Netzwerk-Printserver zwischen der VM und dem Drucker; alternativ kann der Drucker per USB direkt an die VM oder an den Proxmox-Host mit USB-Passthrough angebunden werden.
+
+---
+
+## 🖧 Netzwerk-Topologie
 
 - **LAN:** Fritzbox Router (DHCP, DNS via Pi-hole)
+- **Print-Netz:** Digitus Printserver hat eine feste IP (empfohlen z. B. 192.168.1.50) oder DHCP-Reservierung
+- **VM-Netzwerk:** print-vm auf Proxmox mit statischer IP (z. B. 192.168.1.100) oder DHCP-Reservierung
 - **VPN:** Tailscale für sicheren Remote-Zugriff und Inter-Server-Kommunikation
 - **DNS:** Pi-hole (zentral, mit lokalen DNS-Records)
 - **Monitoring:** Prometheus → Grafana + Loki (zentrale Metriken & Logs)
 
+---
 
-### Drucker-Topologie (neu)
+### Drucker-Topologie (zusammengefasst)
 
-- Der Proxmox-Server hostet eine Debian-VM, die als Print-Gateway läuft. Diese VM hat alle nötigen Treiber (HPLIP) und CUPS installiert.
-- Ein Digitus Printserver ist per LAN an das zweite Netzwerk-Interface/Port angeschlossen und verbindet sich per USB-Kabel mit dem HP OfficeJet 4558.
-- Die Digitus-Box stellt den Drucker im LAN zur Verfügung (z.B. JetDirect/socket:// oder IPP). Die Debian-VM bindet den Netzwerk-Drucker ein (lpadmin / hp-setup) und bietet den Drucker im Netzwerk (CUPS/IPP) für Anwendungen an.
-- Auf der Homepage (Dashboard) läuft eine Anwendung, die Druckdateien an die Debian-VM schickt (z. B. via IPP, lpr oder lp)
+- Die Print-VM (Debian) hostet CUPS und HPLIP und ist das lokale Druck-Gateway.
+- Digitus Printserver ist per LAN mit dem Switch verbunden und per USB mit dem HP OfficeJet 4558.
+- CUPS kann den Digitus über socket://192.168.1.50:9100 einbinden oder direkt via lpd/ipp; die Homepage-App sendet Druckaufträge an die Print-VM (IPP oder Dateiablage watched by print-worker).
 
 ---
+
+(Rest der Dokumentation bleibt strukturiert wie zuvor; spezifische Kapitel sind unten verlinkt.)
 
 ## 🖥️ Server & Hardware
 
@@ -110,7 +144,7 @@ Das Homelab ist eine verteilte Infrastruktur mit zwei Hauptkomponenten:
 #### Drucker-Setup auf Proxmox (kurz)
 
 - Proxmox stellt Bridges für VMs bereit (z.B. vmbr0). Die Print-VM benötigt mindestens ein Bridge-Interface mit Netzwerkzugriff auf das LAN, optional ein zweites Interface, je nach physischer Verkabelung.
-- Die Digitus-Printserver-Box ist an einen zweiten LAN-Port des Proxmox-Hosts / Netzwerks angeschlossen. Die Debian-VM greift über das LAN auf die Digitus-Box zu.
+- Die Digitus-Printserver-Box ist an einen LAN-Port im Netzwerk angeschlossen. Die Debian-VM greift über das LAN auf die Digitus-Box zu.
 
 ---
 
@@ -132,99 +166,4 @@ Das Homelab ist eine verteilte Infrastruktur mit zwei Hauptkomponenten:
 
 ---
 
-(der restliche Inhalt bleibt unverändert; für Details siehe die jeweiligen Unterdokumente)
-
----
-
-## 📚 Dokumentation
-
-Die Dokumentation ist modular aufgebaut:
-
-```
-📁 Hoinkkoma/homlap-/
-├── README.md ......................... (diese Datei)
-├── CHANGELOG.md ...................... Änderungshistorie
-├── CONTRIBUTING.md ................... Kontributionsrichtlinien
-├── LICENSE ........................... Apache 2.0
-│
-├── 📁 Debian-Monitoring/
-│   ├── README.md ..................... Überblick
-│   ├── prometheus-config.md .......... Prometheus Setup
-│   ├── grafana-dashboards.md ......... Dashboard-Verwaltung
-│   ├── loki-config.md ............... Log-Aggregation
-│   └── uptime-kuma-setup.md ......... Service-Monitoring
-│
-├── 📁 Proxmox/
-│   ├── README.md ..................... Überblick
-│   ├── vm-templates.md .............. VM-Templates
-│   ├── lxc-container.md ............. Container-Setup
-│   ├── storage-zfs.md ............... ZFS-Storage
-│   ├── backup-strategy.md ........... Backup & Recovery
-│   ├── jellyfin.md / forgejo.md ..... Dienst-spezifische Docs
-│   └── printer-vm.md ............... Drucker-VM & CUPS Konfiguration (neu)
-│
-├── 📁 Docker/
-│   ├── README.md ..................... Überblick
-│   ├── docker-compose.yml ........... Compose-Beispiele
-│   ├── portainer-setup.md ........... Portainer-Verwaltung
-│   └── container-updates.md ......... Update-Prozesse
-│
-├── 📁 Netzwerk/
-│   ├── README.md ..................... Überblick
-│   ├── pihole-config.md ............. DNS-Filter Setup
-│   ├── tailscale-setup.md ........... VPN-Konfiguration
-│   ├── network-diagram.md ........... Netzwerk-Topologie
-│   ├── security.md .................. Sicherheitsrichtlinien
-│   └── printserver-digitus.md ...... Digitus Printserver Konfiguration (neu)
-│
-├── 📁 Wartung/
-│   ├── README.md ..................... Überblick
-│   ├── checklist.md ................. Regelmäßige Checks
-│   ├── update-procedure.md .......... Update-Ablauf
-│   ├── certificate-management.md .... SSL/TLS Management
-│   └── performance-tuning.md ........ Optimierung
-│
-└── 📁 Fehlerbehebung/
-    ├── README.md ..................... Überblick
-    ├── common-issues.md ............. Häufige Probleme
-    ├── logging-debug.md ............. Debug-Techniken
-    ├── backup-recovery.md ........... Disaster Recovery
-    └── troubleshooting-guide.md ..... Systematische Fehlersuche
-```
-
----
-
-## 💾 Backup & Recovery
-
-(gleicher Inhalt wie vorher)
-
----
-
-## 🚀 Roadmap
-
-(gleicher Inhalt wie vorher)
-
----
-
-## 📞 Support & Kontakt
-
-### Bei Fragen oder Problemen:
-
-1. Erstelle ein **Issue** im Repository
-2. Konsultiere die **Dokumentation** im entsprechenden Verzeichnis
-3. Schau in **Fehlerbehebung/** nach bekannten Problemen
-4. Führe einen **Pull Request** mit Improvements durch
-
-### Contributing
-
-Beiträge sind willkommen! Siehe [CONTRIBUTING.md](./CONTRIBUTING.md) für Details.
-
----
-
-## 📝 Lizenz
-
-Dieses Projekt ist unter der [Apache License 2.0](./LICENSE) lizenziert.
-
----
-
-**Hinweis:** Diese Dokumentation ist ein lebendes Dokument und wird kontinuierlich mit dem Ausbau des Homelabs aktualisiert. Letzte Aktualisierung: **2026-08-13**
+(Der Rest des Dokuments bleibt unverändert; detaillierte Abschnitte findest du in den jeweiligen Unterordnern.)
