@@ -9,17 +9,28 @@ in der alles kurtz zusammen gefast ist
 
 ## 📋 Inhaltsverzeichnis
 
-1. [Zweck & Übersicht](#zweck--übersicht)
-2. [Architektur (Grafisch)](#architektur-grafisch)
-3. [Zwei Hauptkategorien](#zwei-hauptkategorien)
+1.  [Alle Geräte](#was--Geräte-drinn-sind)  
+2.  [Zweck & Übersicht](#zweck--übersicht)
+3. [Architektur (Grafisch)](#architektur-grafisch)
+4. [Zwei Hauptkategorien](#zwei-hauptkategorien)
    - [🐧 Debian Server](#-debian-server)
    - [🖥️ Proxmox VE](#️-proxmox-ve)
-4. [Netzwerk-Topologie](#netzwerk-topologie)
-5. [Anwendungen & Dienste](#anwendungen--dienste)
-6. [Schnelleinstieg](#schnelleinstieg)
-7. [Dokumentation & Wiki](#dokumentation--wiki)
-8. [Wartung & Support](#wartung--support)
-
+5. [Netzwerk-Topologie](#netzwerk-topologie)
+6. [Anwendungen & Dienste](#anwendungen--dienste)
+7. [Schnelleinstieg](#schnelleinstieg)
+8. [Dokumentation & Wiki](#dokumentation--wiki)
+9. [Wartung & Support](#wartung--support)
+   
+was--Geräte-drinn-sind
+ **Geräte**
+   -*Proxmox tinkchenter Tower pc*
+   -*Debian server  Mini pc*
+   -*Digitus Print Server*
+   -*Tinkpad 490s*
+   -* Deucker hp OfficeJet 4558*
+   -*Noting pfhone 3a*
+   -*Tinkbook*
+-
 ---
 
 ## Zweck & Übersicht
