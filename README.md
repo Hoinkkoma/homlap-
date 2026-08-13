@@ -90,7 +90,7 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
   │          │    ├───────────────────┤
   │ Jellyfin │    │ Connected via:    │
   │ Forgejo  │    │ Ethernet/Switch   │
-  │Vaultwarden   │ to Proxmox Host   │
+  │Vaultwarden    │  to Proxmox Host  │
   │ Immich   │    │                   │
   └──────────┘    └────────┬──────────┘
                            │ (USB)
