@@ -9,7 +9,7 @@ in der alles kurtz zusammen gefast ist
 
 ## 📋 Inhaltsverzeichnis
 
-1.  [Alle Geräte](#was--Geräte-drinn-sind)  
+1.  [Alle Geräte](#alle-geräte)  
 2.  [Zweck & Übersicht](#zweck--übersicht)
 3. [Architektur (Grafisch)](#architektur-grafisch)
 4. [Zwei Hauptkategorien](#zwei-hauptkategorien)
@@ -21,17 +21,20 @@ in der alles kurtz zusammen gefast ist
 8. [Dokumentation & Wiki](#dokumentation--wiki)
 9. [Wartung & Support](#wartung--support)
    
-was--Geräte-drinn-sind
- **Geräte**
- 
-   -*Proxmox tinkchenter Tower pc*
-   -*Debian server  Mini pc*
-   -*Digitus Print Server*
-   -*Tinkpad 490s*
-   -* Deucker hp OfficeJet 4558*
-   -*Noting pfhone 3a*
-   -*Tinkbook*
--
+## Alle Geräte
+
+Hier ist eine bereinigte Liste der vorhandenen Geräte im Homelab.
+
+| Gerät | Typ | Standort / Notizen |
+|---|---:|---|
+| Proxmox ThinkCentre Tower PC | Virtualisierungs-Host (Proxmox VE) | Tower, VMs & LXC, USB-Passthrough |
+| Debian Server (Mini-PC) | Monitoring & Services | Prometheus, Grafana, Loki, Cockpit |
+| Digitus Print Server | Print-Gateway (CUPS) | Verbunden mit HP OfficeJet |
+| ThinkPad T490s | Laptop | Administration / Mobile Arbeit |
+| HP OfficeJet 4558 | Drucker | USB / JetDirect, über Digitus erreichbar |
+| Nothing Phone 3a | Smartphone | Mobilgerät |
+| ThinkBook | Laptop | Allgemeiner Gebrauch |
+
 ---
 
 ## Zweck & Übersicht
@@ -52,9 +55,9 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
 ## Architektur (Grafisch)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────�[...]
 │                    Hoinkkoma Homelab                            │
-└─────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────�[...]
 
 ┌──────────────────────┐          ┌──────────────────────┐
 │   🖥️ PROXMOX HOST    │          │  🐧 DEBIAN SERVER   │
