@@ -8,7 +8,7 @@ Kurzüberblick
 
 - Monitoring & Management: Debian‑Server (Prometheus, Grafana, Loki, Uptime Kuma, Scrutiny)
 - Virtualisierung: Proxmox Host (VMs, LXC, Docker)
-- Druck: Print‑Gateway (Debian VM mit CUPS/HPLIP) → Digitus Printserver → HP OfficeJet 4558
+- Druck: Print‑Gateway (Debian VM mit CUPS/HPLIP) → Digitus Printserver (direkt an Proxmox Host) → HP OfficeJet 4558
 
 Schnellstart (wenn du nur drucken willst)
 
@@ -16,19 +16,21 @@ Schnellstart (wenn du nur drucken willst)
 2. print‑vm (CUPS) übernimmt den Job und leitet ihn an den Digitus Printserver weiter (oder verwaltet den Drucker direkt, wenn USB‑durchgereicht).
 3. Digitus liefert die Daten per USB an den HP OfficeJet 4558 — fertig.
 
+Hinweis zur Verkabelung (aktualisiert)
+
+- Der Digitus Printserver ist nicht über einen separaten Switch mit dem Netzwerk verbunden — er sitzt direkt an einem zweiten LAN‑Port des Proxmox Hosts. Der Host führt das Traffic‑Routing/Bridging zur VM durch (z. B. via vmbr1), sodass die print‑vm den Digitus per Hostname/Bridge erreichen kann.
+
 Wichtige Links in diesem Repo
 
 - Architektur (visuell): assets/architecture.svg
-- Proxmox: Proxmox/printer-vm.md — Setup & Tipps für die Debian‑Print‑VM
-- Netzwerk: Netzwerk/printserver-digitus.md — Digitus‑Konfiguration & Tests
-- Netzwerk: Netzwerk/network-diagram.md — Zonen, Firewall‑Legende & Hardening
-- Automation: ansible/playbook.yml — Playbook zur Einrichtung der Print‑VM
+- Proxmox: Proxmox/printer-vm.md — Setup & Tipps für die Debian‑Print‑VM (inkl. Hinweise zum Bridge/Second‑NIC)
+- Netzwerk: Netzwerk/printserver-digitus.md — Digitus‑Konfiguration & Tests (Direktverbindung an Proxmox Host) 
+- Netzwerk: Netzwerk/network-diagram.md — Zonen, Firewall‑Legende & Hardening (aktualisiert)
 - Skripte: Proxmox/print-worker.sh, Proxmox/print-worker-watcher.sh, Proxmox/print-worker.service
 
-Was ich dir empfehle
+Was du als Admin wissen solltest
 
-- Verwende Hostnamen / DHCP‑Reservierungen (keine harten IPs in der Doku)
-- Halte CUPS nur im LAN oder erreichbar via VPN (Tailscale)
-- Teste mit `lp` und `lpstat` bevor du die Homepage produktiv anschließt
+- Wenn der Digitus an einen zweiten NIC am Proxmox Host angeschlossen ist, muss dieser NIC in eine Bridge (z. B. vmbr1) eingebunden werden oder geroutet sein, damit die print‑vm den Digitus erreichen kann.
+- Alternativ kann der Proxmox Host IP‑Forwarding übernehmen und lokale Firewall‑Regeln setzen; in der Doku findest du Beispiele und Empfehlungen.
 
-Wenn du willst, mache ich dir ein kurzes Ansible‑Playbook (fertig im Repo) und ein Beispiel, wie du die Homepage‑App mit dem Print‑Gateway verbindest. Oder ich passe die Sprache noch lockerer an — sag Bescheid.
+Wenn du willst, passe ich die kurzen Konfig‑Snippets in Proxmox/printer-vm.md an (Beispiel: wie man vmbr1 anlegt und eine VM an diese Bridge hängt). Sag kurz „Snippets anpassen“, dann übernehme ich es.
