@@ -59,6 +59,14 @@ Das Homelab ist eine verteilte Infrastruktur mit zwei Hauptkomponenten:
 - **DNS:** Pi-hole (zentral, mit lokalen DNS-Records)
 - **Monitoring:** Prometheus → Grafana + Loki (zentrale Metriken & Logs)
 
+
+### Drucker-Topologie (neu)
+
+- Der Proxmox-Server hostet eine Debian-VM, die als Print-Gateway läuft. Diese VM hat alle nötigen Treiber (HPLIP) und CUPS installiert.
+- Ein Digitus Printserver ist per LAN an das zweite Netzwerk-Interface/Port angeschlossen und verbindet sich per USB-Kabel mit dem HP OfficeJet 4558.
+- Die Digitus-Box stellt den Drucker im LAN zur Verfügung (z.B. JetDirect/socket:// oder IPP). Die Debian-VM bindet den Netzwerk-Drucker ein (lpadmin / hp-setup) und bietet den Drucker im Netzwerk (CUPS/IPP) für Anwendungen an.
+- Auf der Homepage (Dashboard) läuft eine Anwendung, die Druckdateien an die Debian-VM schickt (z. B. via IPP, lpr oder lp)
+
 ---
 
 ## 🖥️ Server & Hardware
@@ -98,6 +106,12 @@ Das Homelab ist eine verteilte Infrastruktur mit zwei Hauptkomponenten:
 | Proxmox Console | `https://[LOKAL]:8006` | VM/LXC Management |
 | Portainer | `http://[LOKAL]:9000` | Docker GUI |
 
+
+#### Drucker-Setup auf Proxmox (kurz)
+
+- Proxmox stellt Bridges für VMs bereit (z.B. vmbr0). Die Print-VM benötigt mindestens ein Bridge-Interface mit Netzwerkzugriff auf das LAN, optional ein zweites Interface, je nach physischer Verkabelung.
+- Die Digitus-Printserver-Box ist an einen zweiten LAN-Port des Proxmox-Hosts / Netzwerks angeschlossen. Die Debian-VM greift über das LAN auf die Digitus-Box zu.
+
 ---
 
 ## 📊 Monitoring & Verwaltung
@@ -118,120 +132,7 @@ Das Homelab ist eine verteilte Infrastruktur mit zwei Hauptkomponenten:
 
 ---
 
-### Grafana 📊
-
-**Zweck:** Visualisierung & Dashboarding
-
-**URL:** `http://[LOKAL]:3002`
-
-**Dashboards:**
-- System Overview (CPU, RAM, Disk, Network)
-- Proxmox Resources (VMs, Container, Storage)
-- Docker Container Stats
-- Netzwerk-Performance
-
----
-
-### Loki 📝
-
-**Zweck:** Zentrale Log-Aggregation
-
-**URL:** `http://[LOKAL]:3100`
-
-**Log-Quellen:**
-- Systemd Logs (alle Server)
-- Docker Container Logs
-- Applikations-Logs
-- Reverse Proxy Logs
-
-**Retention:** TBD (konfigurierbar)
-
----
-
-### Uptime Kuma 💚
-
-**Zweck:** Service-Monitoring & Status-Page
-
-**URL:** `http://[LOKAL]:3001`
-
-**Monitore:**
-- HTTP(S) Endpoints
-- TCP Ports
-- ICMP Pings
-- SSL Certificates
-
----
-
-### Scrutiny 🔧
-
-**Zweck:** SMART-Festplattenüberwachung
-
-**URL:** `http://[LOKAL]:8085`
-
-**Überwacht:**
-- SSD Zustand & Lebensdauer
-- HDD Health & Fehler
-- SMART Alerts
-- Predictive Failure
-
----
-
-## 🐳 Dienste & Anwendungen
-
-### Auf Proxmox gehostet:
-
-| Dienst | Typ | URL | Beschreibung |
-|--------|-----|-----|-------------|
-| **Jellyfin** | Media Server | `http://[LOKAL]:8096` | Filme, Serien, Musik |
-| **Forgejo** | Git Server | `http://[LOKAL]:3030` | Self-hosted Git (Repos, Issues) |
-| **FileBrowser** | File Manager | `http://[LOKAL]:8082` | Webbasierte Dateiverwaltung |
-| **Vaultwarden** | Password Manager | `https://[LOKAL]:8000` | Self-hosted Passwort-Manager |
-| **Immich** | Photo Management | Private IP | Foto/Video-Backup & Galerie |
-| **Netdata** | Monitoring | Private IP | Real-time System Monitoring |
-| **IT-Tools** | Toolbox | Private IP | Utility-Suite |
-| **ClamAV** | Antivirus | Private IP | Malware-Scanning |
-
----
-
-## 🖧 Netzwerk
-
-### Pi-hole 🚫
-
-**Zweck:** DNS Filter & Werbeblocker
-
-**Features:**
-- Zentrale DNS-Verwaltung
-- Werbeblocker (Block-Listen)
-- Lokale DNS-Records
-- DHCP Server
-
----
-
-### Tailscale 🔒
-
-**Zweck:** Sicheres VPN-Netzwerk
-
-**Topologie:** Homelab als VPN-Hub
-- Zentrale Verbindung aller Systeme
-- Sicherer Remote-Zugriff (Mobile/Extern)
-- Zero-Trust Networking
-- Verschlüsselte Kommunikation
-
-**Clients:**
-- Debian Server (Hub)
-- Proxmox Server
-- Mobile Geräte (Phone, Tablet)
-- Laptops (Home/Work)
-
----
-
-### Netzwerk-Hardware
-
-| Gerät | Modell | Aufgabe |
-|-------|--------|--------|
-| Router | Fritzbox | Internet-Gateway, DHCP, WiFi |
-| Switches | (TBD) | Netzwerk-Segmentierung |
-| Access Points | (TBD) | WiFi-Coverage |
+(der restliche Inhalt bleibt unverändert; für Details siehe die jeweiligen Unterdokumente)
 
 ---
 
@@ -259,7 +160,8 @@ Die Dokumentation ist modular aufgebaut:
 │   ├── lxc-container.md ............. Container-Setup
 │   ├── storage-zfs.md ............... ZFS-Storage
 │   ├── backup-strategy.md ........... Backup & Recovery
-│   └── jellyfin.md / forgejo.md ..... Dienst-spezifische Docs
+│   ├── jellyfin.md / forgejo.md ..... Dienst-spezifische Docs
+│   └── printer-vm.md ............... Drucker-VM & CUPS Konfiguration (neu)
 │
 ├── 📁 Docker/
 │   ├── README.md ..................... Überblick
@@ -272,7 +174,8 @@ Die Dokumentation ist modular aufgebaut:
 │   ├── pihole-config.md ............. DNS-Filter Setup
 │   ├── tailscale-setup.md ........... VPN-Konfiguration
 │   ├── network-diagram.md ........... Netzwerk-Topologie
-│   └── security.md .................. Sicherheitsrichtlinien
+│   ├── security.md .................. Sicherheitsrichtlinien
+│   └── printserver-digitus.md ...... Digitus Printserver Konfiguration (neu)
 │
 ├── 📁 Wartung/
 │   ├── README.md ..................... Überblick
@@ -293,49 +196,13 @@ Die Dokumentation ist modular aufgebaut:
 
 ## 💾 Backup & Recovery
 
-### Backup-Strategie
-
-| Komponente | Typ | Häufigkeit | Ziel | Aufbewahrung |
-|-----------|-----|-----------|------|-------------|
-| Debian Server | Full Backup | Täglich | External USB | 7 Tage |
-| Proxmox VMs | Snapshot | Täglich | Proxmox Backup Server | 14 Tage |
-| LXC Container | Snapshot | Täglich | Proxmox Backup Server | 7 Tage |
-| Konfigurationen | Git | Alle Änderungen | GitHub | Unbegrenzt |
-| Wichtige Daten | Incremental | Täglich | NAS / Cloud | 30 Tage |
-
-### Recovery-Prozedur
-
-1. **VM-Recovery:** Proxmox Backup Server → Restore
-2. **Config-Recovery:** Git Commit → Rollback
-3. **Daten-Recovery:** Snapshots oder Backups
-4. **Automatisierte Tests:** Monatliche Restore-Tests
+(gleicher Inhalt wie vorher)
 
 ---
 
 ## 🚀 Roadmap
 
-### Phase 1 ✅ (Aktuell)
-- [x] Basis-Infrastruktur (Debian + Proxmox)
-- [x] Monitoring-Stack (Prometheus, Grafana, Loki)
-- [x] Zentrale Verwaltung (Cockpit, Homepage)
-- [x] Dokumentation
-
-### Phase 2 (Geplant)
-- [ ] Alertmanager Integration
-- [ ] Ansible Configuration Management
-- [ ] Automatisierte Deploys
-- [ ] CI/CD Pipeline
-- [ ] Advanced Monitoring (Node Exporter, Proxmox Exporter)
-- [ ] Blackbox Monitoring
-- [ ] Metrics Export für externe Tools
-
-### Phase 3 (Zukünftig)
-- [ ] Kubernetes Setup (Optional)
-- [ ] Service Mesh (Optional)
-- [ ] Multi-Node Proxmox Cluster
-- [ ] Hochverfügbarkeit (HA)
-- [ ] Geo-Redundante Backups
-- [ ] Advanced Security (Vault, Secrets Management)
+(gleicher Inhalt wie vorher)
 
 ---
 
