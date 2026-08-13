@@ -23,7 +23,7 @@ in der alles kurtz zusammen gefast ist
    
 ## Alle Geräte
 
-Liste der vorhandenen Geräte im Homelab.
+Hier ist eine bereinigte Liste der vorhandenen Geräte im Homelab.
 
 | Gerät | Typ | Standort / Notizen |
 |---|---:|---|
@@ -55,26 +55,49 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
 ## Architektur (Grafisch)
 
 ```
-┌────────────────────────────────────────────────────────────────�[...]
+┌────────────────────────────────────────────────────────────────┐
 │                    Hoinkkoma Homelab                            │
-└────────────────────────────────────────────────────────────────�[...]
+└────────────────────────────────────────────────────────────────┘
 
-┌──────────────────────┐          ┌──────────────────────┐
-│   🖥️ PROXMOX HOST    │          │  🐧 DEBIAN SERVER   │
-│  (Virtualisierung)   │◄─────────►│   (Monitoring)      │
-├──────────────────────┤          ├──────────────────────┤
-│ • VMs                │          │ • Prometheus         │
-│ • LXC Container      │          │ • Grafana            │
-│ • Docker (Portainer) │          │ • Loki (Logs)        │
-│ • print-vm (CUPS)    │          │ • Uptime Kuma        │
-└──────────────────────┘          │ • Scrutiny           │
-         │                        │ • Cockpit            │
-         │                        └──────────────────────┘
-         │
-         ├─► [Jellyfin] [Forgejo] [Vaultwarden] [Immich] ...
-         │
-         └─► 🖨️ DIGITUS PRINTSERVER
-             └─► HP OfficeJet 4558
+                     ┌─────────────────┐
+                     │  🌐 INTERNET    │
+                     │ (Heimnetzwerk)  │
+                     └────────┬────────┘
+                              │
+                     ┌────────▼────────┐
+                     │    🔀 SWITCH    │
+                     └────┬────────┬───┘
+                          │        │
+            ┌─────────────┘        └─────────────┐
+            │                                    │
+    ┌───────▼──────────┐            ┌───────────▼──────┐
+    │  🖥️ PROXMOX HOST │            │ 🐧 DEBIAN SERVER │
+    │ (Virtualisierung)│            │  (Monitoring)    │
+    ├──────────────────┤            ├──────────────────┤
+    │ • VMs            │◄──────────►│ • Prometheus     │
+    │ • LXC Container  │ (SSH+Metr.)│ • Grafana        │
+    │ • Docker         │            │ • Loki (Logs)    │
+    │ • print-vm CUPS  │            │ • Uptime Kuma    │
+    └─────────┬────────┘            │ • Scrutiny       │
+              │                     │ • Cockpit        │
+              │ (vmbr0, vmbr1)      └──────────────────┘
+              │
+      ┌───────┴─────────┐
+      │                 │
+  ┌───▼──────┐    ┌────▼──────────────┐
+  │ Services │    │ 🖨️ DIGITUS        │
+  │Container │    │ PRINTSERVER       │
+  │          │    ├───────────────────┤
+  │ Jellyfin │    │ Connected via:    │
+  │ Forgejo  │    │ Ethernet/Switch   │
+  │Vaultwarden   │ to Proxmox Host   │
+  │ Immich   │    │                   │
+  └──────────┘    └────────┬──────────┘
+                           │ (USB)
+                  ┌────────▼──────────┐
+                  │  🖨️ HP OFFICEJET │
+                  │      4558        │
+                  └──────────────────┘
 ```
 
 **Grafische Version:** Siehe [Netzwerk-Topologie](#netzwerk-topologie)
@@ -116,27 +139,32 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
 
 ```mermaid
 graph TD
-    A["🌐 WAN / Heimnetzwerk"] -->|Bridge| B["🖥️ Proxmox Host"]
+    WAN["🌐 Internet / Heimnetzwerk"]
+    SW["🔀 Network Switch"]
     
-    B -->|vmbr0| C["🐳 Docker Container"]
-    B -->|vmbr1| D["🖨️ Print VLAN"]
-    B -->|Direct| E["🐧 print-vm CUPS"]
+    WAN -->|Ethernet| SW
     
-    F["🐧 Debian Monitoring Server"] -->|SSH + Metrics| B
-    F -->|SSH + Metrics| E
+    SW -->|Ethernet| PROX["🖥️ Proxmox Host"]
+    SW -->|Ethernet| DEB["🐧 Debian Monitoring Server"]
+    SW -->|Ethernet| DIGI["🖨️ Digitus Printserver"]
     
-    E -->|IPP/LPD| G["🖨️ Digitus Printserver"]
-    G -->|USB| H["🖨️ HP OfficeJet 4558"]
+    PROX -->|SSH + Metrics| DEB
+    PROX -->|vmbr0| DOCKER["🐳 Docker Container"]
+    PROX -->|vmbr1| PRINT_VM["🐧 print-vm (CUPS)"]
     
-    C -->|Services| I["Jellyfin 🎬"]
-    C -->|Services| J["Forgejo 📝"]
-    C -->|Services| K["Vaultwarden 🔐"]
-    C -->|Services| L["Immich 📸"]
+    DOCKER -->|Services| JELLY["Jellyfin 🎬"]
+    DOCKER -->|Services| FORGE["Forgejo 📝"]
+    DOCKER -->|Services| VAULT["Vaultwarden 🔐"]
+    DOCKER -->|Services| IMMICH["Immich 📸"]
     
-    style A fill:#e1f5ff
-    style B fill:#fff3e0
-    style F fill:#f3e5f5
-    style H fill:#e8f5e9
+    DIGI -->|USB| HP["🖨️ HP OfficeJet 4558"]
+    
+    style WAN fill:#e1f5ff
+    style SW fill:#fff9c4
+    style PROX fill:#fff3e0
+    style DEB fill:#f3e5f5
+    style DIGI fill:#e8f5e9
+    style HP fill:#c8e6c9
 ```
 
 ---
@@ -173,6 +201,8 @@ graph TD
 
 ### 1️⃣ Erste Schritte (nach Installation)
 
+- [ ] **Switch:** Internet & beide Hauptserver verbinden (Proxmox + Debian)
+- [ ] **Digitus:** Mit Switch verbinden & mit HP OfficeJet koppeln
 - [ ] **Proxmox:** Netzwerk-Bridges konfigurieren (`vmbr0`, `vmbr1`)
 - [ ] **Debian Server:** Basis-Services starten
 - [ ] **Monitoring:** Prometheus + Grafana aktivieren
@@ -247,15 +277,17 @@ http://debian-server:3002
 □ Kritische Alerts?        Grafana Dashboard
 □ Disk-Space OK?           Scrutiny / df -h
 □ Netzwerk stabil?         ping <services>
+□ Druck verfügbar?         Digitus erreichbar?
 ```
 
 ### ⚠️ Häufige Probleme
 
 | Problem | Ursache | Lösung |
 |---------|---------|--------|
-| Druck geht nicht | print-vm offline | `systemctl restart cups` auf print-vm |
-| Monitoring weg | Prometheus down | `systemctl restart prometheus` |
-| Netzwerk langsam | Firewall/Bridge? | Siehe `Netzwerk/README.md` |
+| Druck geht nicht | Digitus offline | Digitus mit Switch neu verbinden |
+| print-vm nicht erreichbar | Netzwerk-Bridge fehlt | vmbr1 in Proxmox prüfen |
+| Monitoring weg | Prometheus down | `systemctl restart prometheus` auf Debian |
+| Netzwerk langsam | Switch/Firewall? | Siehe `Netzwerk/README.md` |
 | Docker voll | Storage nicht geleert | `docker system prune -a` |
 
 📖 **Ausführlich:** [`Fehlerbehebung/`](./Fehlerbehebung/)
