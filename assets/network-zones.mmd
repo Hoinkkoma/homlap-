@@ -1,0 +1,9 @@
+%% assets/network-zones.mmd
+flowchart TB
+  Router[Router / Edge] --> Management[Management Zone\n(Debian Monitoring)]
+  Router --> Services[Services Zone\n(Apps)]
+  Router --> Print[Print Zone]
+  Management --> Proxmox[Proxmox Host]
+  Services --> PrintVM[print-vm (auf Proxmox)]
+  Print --> Digitus[Digitus Printserver]
+  Digitus --> HP[HP OfficeJet 4558]
