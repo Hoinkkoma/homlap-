@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="220" viewBox="0 0 800 220">
+  <style>
+    .title { font: bold 16px sans-serif; }
+    .node { font: 14px sans-serif; }
+    .arrow { stroke: #333; stroke-width: 2; fill: none; }
+  </style>
+  <text x="10" y="20" class="title">Print Flow — End-to-End (simplified)</text>
+
+  <rect x="10" y="40" width="140" height="40" fill="#e6f7ff" stroke="#005b96"/>
+  <text x="25" y="65" class="node">Homepage</text>
+
+  <rect x="180" y="40" width="160" height="40" fill="#fff7e6" stroke="#b36b00"/>
+  <text x="200" y="65" class="node">PrintWorker</text>
+
+  <rect x="370" y="40" width="160" height="40" fill="#e6ffe6" stroke="#0b6623"/>
+  <text x="400" y="65" class="node">print-vm (CUPS)</text>
+
+  <rect x="560" y="40" width="160" height="40" fill="#ffe6f2" stroke="#8b0066"/>
+  <text x="580" y="65" class="node">Digitus</text>
+
+  <rect x="730" y="40" width="60" height="40" fill="#f0f0f0" stroke="#666"/>
+  <text x="740" y="65" class="node">HP</text>
+
+  <!-- Arrows -->
+  <path class="arrow" d="M150 60 L180 60" marker-end="url(#arrow)" />
+  <path class="arrow" d="M340 60 L370 60" marker-end="url(#arrow)" />
+  <path class="arrow" d="M530 60 L560 60" marker-end="url(#arrow)" />
+  <path class="arrow" d="M720 60 L730 60" marker-end="url(#arrow)" />
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333" />
+    </marker>
+  </defs>
+
+  <!-- notes -->
+  <text x="10" y="120" class="node">1) Homepage uploads PDFs to PrintWorker (HTTP POST or dropfolder)</text>
+  <text x="10" y="140" class="node">2) PrintWorker calls lp -d &lt;PRINTER&gt; file.pdf to CUPS</text>
+  <text x="10" y="160" class="node">3) CUPS forwards to Digitus via socket://digitus:9100</text>
+  <text x="10" y="180" class="node">4) Digitus sends data over USB to the HP OfficeJet</text>
+</svg>
