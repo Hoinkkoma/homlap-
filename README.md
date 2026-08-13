@@ -22,19 +22,19 @@ Dort werden alle Dienste, Links und Statusinformationen gebündelt.
                              |
                        Tailscale VPN
                              |
-              +--------------+--------------+
-              |                             |
-              |                             |
+                +--------------+--------------+
+                |                             |
+                |                             |
  Debian Monitoring Server              Proxmox Server
  Verwaltung / Überwachung             Dienste / Anwendungen
-              |                             |
-              |                             |
-       Prometheus                    Docker / VMs / LXC
-       Grafana                       Portainer
-       Loki                          Jellyfin
-       Uptime Kuma                   Forgejo
-       Scrutiny                      FileBrowser
-                                     Vaultwarden
+                |                             |
+                |                             |
+         Prometheus                    Docker / VMs / LXC
+         Grafana                       Portainer
+         Loki                          Jellyfin
+         Uptime Kuma                   Forgejo
+         Scrutiny                      FileBrowser
+                                       Vaultwarden
 ```
 
 ---
@@ -57,7 +57,7 @@ Aufgaben:
 ## Netzwerk
 
 ```text
-IP: [REDACTED_IP]
+IP: [LOKAL]
 ```
 
 ## Verwaltung
@@ -65,7 +65,7 @@ IP: [REDACTED_IP]
 Cockpit:
 
 ```text
-https://[REDACTED_IP]:9090
+https://[LOKAL]:9090
 ```
 
 ---
@@ -77,7 +77,7 @@ https://[REDACTED_IP]:9090
 URL:
 
 ```text
-http://[REDACTED_IP]:3002
+http://[LOKAL]:3002
 ```
 
 Aufgabe:
@@ -94,7 +94,7 @@ Aufgabe:
 URL:
 
 ```text
-http://[REDACTED_IP]:9091
+http://[LOKAL]:9091
 ```
 
 Aufgabe:
@@ -114,7 +114,7 @@ Aufgabe:
 URL:
 
 ```text
-http://[REDACTED_IP]:3100
+http://[LOKAL]:3100
 ```
 
 Aufgabe:
@@ -130,7 +130,7 @@ Aufgabe:
 URL:
 
 ```text
-http://[REDACTED_IP]:3001
+http://[LOKAL]:3001
 ```
 
 Aufgabe:
@@ -150,7 +150,7 @@ Aufgabe:
 URL:
 
 ```text
-http://[REDACTED_IP]:8085
+http://[LOKAL]:8085
 ```
 
 Aufgabe:
@@ -181,13 +181,13 @@ Aufgaben:
 ## Netzwerk
 
 ```text
-IP: [REDACTED_IP]
+IP: [LOKAL]
 ```
 
 ## Webinterface
 
 ```text
-https://[REDACTED_IP]:8006
+https://[LOKAL]:8006
 ```
 
 ---
@@ -199,7 +199,7 @@ https://[REDACTED_IP]:8006
 URL:
 
 ```text
-http://[REDACTED_IP]:9000
+http://[LOKAL]:9000
 ```
 
 Aufgabe:
@@ -218,7 +218,7 @@ Docker Verwaltung:
 URL:
 
 ```text
-http://[REDACTED_IP]:8096
+http://[LOKAL]:8096
 ```
 
 Aufgabe:
@@ -237,7 +237,7 @@ Medienserver:
 URL:
 
 ```text
-http://[REDACTED_IP]:3030
+http://[LOKAL]:3030
 ```
 
 Aufgabe:
@@ -256,7 +256,7 @@ Self-hosted Git Server:
 URL:
 
 ```text
-http://[REDACTED_IP]:8082
+http://[LOKAL]:8082
 ```
 
 Aufgabe:
@@ -270,7 +270,7 @@ Webbasierte Dateiverwaltung.
 URL:
 
 ```text
-https://[REDACTED_IP]:8000
+https://[LOKAL]:8000
 ```
 
 Aufgabe:
@@ -433,7 +433,7 @@ Betreiber des Homelabs
 # Letzte Aktualisierung
 
 ```text
-2026-08-01
+2026-08-13
 ```
 
 Diese Dokumentation ist ein lebendes Dokument und wird mit dem Ausbau des Homelabs erweitert.
