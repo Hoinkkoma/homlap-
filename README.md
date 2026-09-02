@@ -12,10 +12,11 @@ Moin Moin Leude das ist mein homlap projekt die repro ist ne kleine dokumatirung
 |:---:|---|---|
 | **🐧 Debian Server** | [`Debian-Monitoring/`](./Debian-Monitoring/) | Monitoring-Zentrale (Prometheus, Grafana, Loki, Cockpit) |
 | **🖥️ Proxmox VE** | [`Proxmox/`](./Proxmox/) | Virtualisierungs-Host (VMs, Container, OpenCL, Ollama, n8n) |
-| **📺 Streaming** | [`Docker/`](./Docker/) | Jellyfin, Immich, FileBrowser |
+| **📺 Streaming** | [`Docker/`](./Docker/) | Jellyfin, FileBrowser |
 | **🤖 KI & ML** | [`Proxmox/ai-ml.md`](./Proxmox/ai-ml.md) | Ollama, OpenCL, GPU-Computing |
 | **⚙️ Automation** | [`Proxmox/n8n.md`](./Proxmox/n8n.md) | n8n Workflows, Ablauf-Automation |
 | **💬 Support & Comm.** | [`Docker/chatwoot-setup.md`](./Docker/chatwoot-setup.md) | ChatWoot, Kundenkommunikation |
+| **🖨️ Druck** | [`Netzwerk/printserver-digitus.md`](./Netzwerk/printserver-digitus.md) | Digitus Printserver, HP OfficeJet |
 
 ---
 
@@ -30,11 +31,10 @@ graph LR
     
     SW -->|Ethernet| PROX["🖥️ Proxmox Host"]
     SW -->|Ethernet| DEB["🐧 Debian Monitor"]
-    SW -->|Ethernet| DIGI["🖨️ Digitus"]
+    SW -->|Ethernet| DIGI["🖨️ Digitus Printserver"]
     
     PROX -->|SSH+Metrics| DEB
-    PROX -->|vmbr0| DOCKER["🐳 Docker Container<br/>Jellyfin • Forgejo • Vaultwarden • Immich • ChatWoot"]
-    PROX -->|vmbr1| PRINT["🐧 print-vm CUPS"]
+    PROX -->|vmbr0| DOCKER["🐳 Docker Container<br/>Jellyfin • Forgejo • Vaultwarden • ChatWoot"]
     PROX -->|GPU| OLLAMA["🤖 Ollama"]
     PROX -->|Workflows| N8N["⚙️ n8n"]
     
@@ -57,7 +57,7 @@ graph LR
 
 | Gerät | Typ | Spezifikation | Funktion | Services |
 |---|---|---|---|---|
-| **Proxmox ThinkCentre Tower PC** | Virtualisierungs-Host | Intel CPU, 16-32GB RAM, SSD | Zentrale Compute-Plattform | VMs, LXC Container, Docker, OpenCL, Ollama, n8n, print-vm |
+| **Proxmox ThinkCentre Tower PC** | Virtualisierungs-Host | Intel CPU, 16-32GB RAM, SSD | Zentrale Compute-Plattform | VMs, LXC Container, Docker, OpenCL, Ollama, n8n |
 | **Debian Server (Mini-PC)** | Monitoring & Verwaltung | ARM/x86, 4-8GB RAM | Zentrale Überwachung & Verwaltung | Prometheus, Grafana, Loki, Cockpit, Uptime Kuma, Scrutiny, ChatWoot |
 | **Digitus Print Server** | Print-Gateway | Standalone Device | Druck-Management | CUPS Server, HP OfficeJet Verbindung, JetDirect (Port 9100) |
 | **ThinkPad T490s** | Admin-Laptop | Intel i7, 16GB RAM | Administrative Aufgaben | SSH, Remote Desktop, Web-UI Zugriff |
@@ -84,7 +84,6 @@ graph LR
 
 ### 📺 Media & Storage
 - **Jellyfin** — Medienserver (Filme, Serien, Musik)
-- **Immich** — Foto-Management & Cloud
 - **FileBrowser** — Web-Dateimanager
 
 ### 🤝 Zusammenarbeit & Sicherheit
@@ -95,6 +94,11 @@ graph LR
 ### 🤖 KI & Machine Learning
 - **Ollama** — Lokaler LLM-Server (qwull-Modell)
 - **OpenCL** — GPU-Computing & GPGPU
+
+### 🖨️ Druck & Scanning
+- **Digitus Printserver** — Netzwerk-Druckergateway
+- **CUPS** — Print-Spooler & -Management
+- **HP OfficeJet 4558** — Multifunktionsdrucker (USB an Digitus)
 
 ---
 
@@ -134,13 +138,6 @@ Proxmox/README.md
 ├─ Netzwerk-Bridges (vmbr0, vmbr1)
 └─ USB-Passthrough & Hardware
 
-Proxmox/printer-vm.md
-├─ print-vm LXC Container Setup
-├─ CUPS Installation & Konfiguration
-├─ Drucker-Verbindung & Einrichtung
-├─ IPP-Protokoll Einrichtung
-└─ Troubleshooting Print-Probleme
-
 Proxmox/ai-ml.md
 ├─ OpenCL Setup & GPU-Erkennung
 ├─ Ollama Installation & Konfiguration
@@ -154,9 +151,6 @@ Proxmox/n8n.md
 ├─ Integration mit externen Services
 ├─ Fehlerbehandlung & Logging
 └─ Backup & Restore
-
-Proxmox/print-worker.service
-└─ Systemd Service für Print-Automation
 ```
 
 ### 🐳 **Docker & Anwendungen** — Container & Services
@@ -177,7 +171,6 @@ Docker/chatwoot-setup.md
 
 docs/apps.md
 ├─ Jellyfin Medienserver Setup
-├─ Immich Foto-Management
 ├─ FileBrowser Dateimanager
 ├─ Forgejo Git-Server
 ├─ Vaultwarden Passwort-Manager
@@ -201,9 +194,10 @@ Netzwerk/network-diagram.md
 
 Netzwerk/printserver-digitus.md
 ├─ Digitus Printserver Setup
-├─ Netzwerk-Verbindung
-├─ CUPS-Integration
-└─ HP OfficeJet Konfiguration
+├─ Netzwerk-Verbindung & LAN-Konfiguration
+├─ CUPS-Installation & -Konfiguration
+├─ HP OfficeJet Drucker-Integration
+└─ Troubleshooting Print-Probleme
 ```
 
 ### 🔧 **Wartung & Support** — Operationen & Troubleshooting
@@ -250,7 +244,7 @@ LICENSE
 | Kachel | Inhalt |
 |:---:|---|
 | 🐧 **Debian Server** | Monitoring & Verwaltung, VPN, Überwachung |
-| 🖥️ **Proxmox** | Virtualisierung, VMs, Container, Digitus |
+| 🖥️ **Proxmox** | Virtualisierung, VMs, Container |
 | 📺 **Streaming** | Jellyfin, Medien, Video/Audio-Management |
 | 🤖 **KI & ML** | Ollama, OpenCL, GPU-Compute |
 | 💬 **Support & Comm.** | ChatWoot, Vaultwarden, Forgejo, n8n |
@@ -265,7 +259,7 @@ LICENSE
 □ Kritische Alerts?              Grafana Dashboard
 □ Disk-Space OK?                 df -h oder Scrutiny
 □ Netzwerk stabil?               ping <services>
-□ Druck verfügbar?               CUPS Dashboard
+□ Druck verfügbar?               CUPS Dashboard / Digitus Web-UI
 □ Ollama läuft?                  curl http://proxmox:11434/api/tags
 □ n8n Workflows OK?              n8n Dashboard prüfen
 □ ChatWoot verfügbar?            http://debian:3000
@@ -277,7 +271,8 @@ LICENSE
 
 | Problem | Lösung |
 |---|---|
-| **Druck geht nicht** | Digitus mit Switch neu verbinden |
+| **Druck geht nicht** | Digitus mit Switch/Netzwerk überprüfen, CUPS Status prüfen |
+| **Digitus nicht erreichbar** | Netzwerk-Verbindung, IP-Adresse, ARP überprüfen |
 | **Prometheus weg** | `systemctl restart prometheus` auf Debian |
 | **Docker voll** | `docker system prune -a` |
 | **Ollama antwortet nicht** | Siehe [`Proxmox/ai-ml.md`](./Proxmox/ai-ml.md) |
@@ -293,25 +288,29 @@ LICENSE
 
 1. **Infrastruktur verbinden**
    - Switch mit Internet, Proxmox, Debian verbinden
-   - Digitus mit Switch & HP OfficeJet verbinden
+   - Digitus mit Switch verbinden
+   - HP OfficeJet via USB an Digitus verbinden
 
 2. **Netzwerk konfigurieren**
-   - Proxmox: `vmbr0`, `vmbr1` setup
+   - Proxmox: `vmbr0` setup
    - Debian: Statische IP konfigurieren
+   - Digitus: IP-Adresse zuweisen (DHCP oder statisch)
 
 3. **Services starten**
    - Debian: Prometheus, Grafana, Loki, Cockpit
    - Proxmox: Docker Container, n8n, Ollama
+   - Digitus: CUPS konfigurieren, Drucker hinzufügen
 
 4. **Monitoring aktivieren**
    - Grafana Dashboard öffnen
    - Prometheus Jobs konfigurieren
 
-5. **Workflows & Automation**
-   - n8n installieren & erste Workflows
-   - ChatWoot Kanäle setup
+5. **Druck-Setup**
+   - Digitus Web-UI öffnen
+   - HP OfficeJet verbinden & konfigurieren
+   - CUPS von Debian/Proxmox aus nutzen
 
-**Anleitung:** Siehe jeweilige `README.md` in `Debian-Monitoring/`, `Proxmox/`, `Docker/`
+**Anleitung:** Siehe jeweilige `README.md` in `Debian-Monitoring/`, `Proxmox/`, `Docker/`, `Netzwerk/`
 
 ---
 
