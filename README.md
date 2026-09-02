@@ -1,6 +1,6 @@
 # 🏠 Hoinkkoma Homelab — Übersicht
 
-**Letzte Aktualisierung:** 2026-08-13
+**Letzte Aktualisierung:** 2026-09-02
 
 Moin Moin Leude das ist mein homlap projekt die repro ist ne kleine dokumatirung des projektes 
 in der alles kurtz zusammen gefast ist 
@@ -27,7 +27,7 @@ in der alles kurtz zusammen gefast ist
 
 | Gerät | Typ | Standort / Notizen |
 |---|---:|---|
-| Proxmox ThinkCentre Tower PC | Virtualisierungs-Host (Proxmox VE) | Tower, VMs & LXC, USB-Passthrough |
+| Proxmox ThinkCentre Tower PC | Virtualisierungs-Host (Proxmox VE) | Tower, VMs & LXC, USB-Passthrough, OpenCL, Ollama |
 | Debian Server (Mini-PC) | Monitoring & Services | Prometheus, Grafana, Loki, Cockpit |
 | Digitus Print Server | Print-Gateway (CUPS) | Verbunden mit HP OfficeJet |
 | ThinkPad T490s | Laptop | Administration / Mobile Arbeit |
@@ -46,6 +46,7 @@ in der alles kurtz zusammen gefast ist
 Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
 - ✅ **Virtualisierung** (Proxmox VE)
 - ✅ **Monitoring & Logging** (Prometheus, Grafana, Loki)
+- ✅ **KI & Machine Learning** (OpenCL, Ollama mit qwull-Modell)
 - ✅ **Anwendungen** (Jellyfin, Forgejo, Immich, uvm.)
 - ✅ **Druckinfrastruktur** (CUPS → Printserver → Drucker)
 - ✅ **Verwaltung & Troubleshooting** Tools
@@ -55,9 +56,9 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
 ## Architektur (Grafisch)
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                    Hoinkkoma Homelab                            │
-└────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                    Hoinkkoma Homelab                              │
+└────────────────────────────────────────────────────────────────────┘
 
                      ┌─────────────────┐
                      │  🌐 INTERNET    │
@@ -78,9 +79,9 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
     │ • LXC Container  │ (SSH+Metr.)│ • Grafana        │
     │ • Docker         │            │ • Loki (Logs)    │
     │ • print-vm CUPS  │            │ • Uptime Kuma    │
-    └─────────┬────────┘            │ • Scrutiny       │
-              │                     │ • Cockpit        │
-              │ (vmbr0, vmbr1)      └──────────────────┘
+    │ • OpenCL         │            │ • Scrutiny       │
+    │ • Ollama (qwull) │            │ • Cockpit        │
+    └─────────┬────────┘            └──────────────────┘
               │
       ┌───────┴─────────┐
       │                 │
@@ -130,6 +131,7 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
 | **Print-Gateway** | print-vm (CUPS-Server) | `Proxmox/printer-vm.md` |
 | **Storage & Netzwerk** | vmbr0, vmbr1, USB-Passthrough | `Proxmox/README.md` |
 | **Automatisierung** | Print-Worker, Systemd-Services | `Proxmox/print-worker.service` |
+| **KI & Machine Learning** | OpenCL, Ollama mit qwull-Modell | `Proxmox/ai-ml.md` |
 
 📖 **Detaillierte Anleitung:** [`Proxmox/`](./Proxmox/)
 
@@ -144,13 +146,14 @@ graph TD
     
     WAN -->|Ethernet| SW
     
-    SW -->|Ethernet| PROX["🖥️ Proxmox Host"]
+    SW -->|Ethernet| PROX["🖥️ Proxmox Host<br/>(OpenCL + Ollama)"]
     SW -->|Ethernet| DEB["🐧 Debian Monitoring Server"]
     SW -->|Ethernet| DIGI["🖨️ Digitus Printserver"]
     
     PROX -->|SSH + Metrics| DEB
     PROX -->|vmbr0| DOCKER["🐳 Docker Container"]
     PROX -->|vmbr1| PRINT_VM["🐧 print-vm (CUPS)"]
+    PROX -->|GPU/Compute| OLLAMA["🤖 Ollama<br/>(qwull-Modell)"]
     
     DOCKER -->|Services| JELLY["Jellyfin 🎬"]
     DOCKER -->|Services| FORGE["Forgejo 📝"]
@@ -165,6 +168,7 @@ graph TD
     style DEB fill:#f3e5f5
     style DIGI fill:#e8f5e9
     style HP fill:#c8e6c9
+    style OLLAMA fill:#ffe0b2
 ```
 
 ---
@@ -180,6 +184,11 @@ graph TD
 - **Forgejo** — Self-Hosted Git-Server
 - **Vaultwarden** — Passwortmanager
 - **Portainer** — Docker-Management UI
+
+### KI & Machine Learning
+- **OpenCL** — GPU-Computing & Compute-Beschleunigung
+- **Ollama** — Lokaler LLM-Server
+  - **qwull-Modell** — Installiertes Sprachmodell unter Proxmox
 
 ### Monitoring & Überwachung
 - **Prometheus** — Metrik-Erfassung
@@ -207,8 +216,9 @@ graph TD
 - [ ] **Debian Server:** Basis-Services starten
 - [ ] **Monitoring:** Prometheus + Grafana aktivieren
 - [ ] **Druck:** print-vm + Digitus verbinden
+- [ ] **OpenCL & Ollama:** Setup & qwull-Modell laden
 
-📖 **Anleitung:** `Proxmox/README.md` + `Debian-Monitoring/README.md`
+📖 **Anleitung:** `Proxmox/README.md` + `Debian-Monitoring/README.md` + `Proxmox/ai-ml.md`
 
 ### 2️⃣ Tägliche Wartung
 
@@ -223,6 +233,9 @@ loki logs
 
 # Metriken in Grafana
 http://debian-server:3002
+
+# Ollama-Status prüfen
+curl http://localhost:11434/api/tags
 ```
 
 📖 **Checklisten:** [`Wartung/`](./Wartung/)
@@ -232,6 +245,7 @@ http://debian-server:3002
 - Dienst ist down? → [`Fehlerbehebung/`](./Fehlerbehebung/)
 - Druck funktioniert nicht? → [`Proxmox/printer-vm.md`](./Proxmox/printer-vm.md)
 - Netzwerk-Issues? → [`Netzwerk/README.md`](./Netzwerk/)
+- Ollama läuft nicht? → [`Proxmox/ai-ml.md`](./Proxmox/ai-ml.md)
 
 ---
 
@@ -248,6 +262,10 @@ http://debian-server:3002
 - `Proxmox/README.md` — Host & VM-Verwaltung
 - `Proxmox/printer-vm.md` — Print-Gateway Setup
 - `Proxmox/print-worker.service` — Systemd-Service
+- `Proxmox/ai-ml.md` — OpenCL & Ollama Setup
+
+#### 🤖 KI & Machine Learning
+- `Proxmox/ai-ml.md` — OpenCL-Konfiguration & Ollama-Installaton
 
 #### 🌐 Netzwerk
 - `Netzwerk/README.md` — Netzwerk-Architektur
@@ -278,6 +296,7 @@ http://debian-server:3002
 □ Disk-Space OK?           Scrutiny / df -h
 □ Netzwerk stabil?         ping <services>
 □ Druck verfügbar?         Digitus erreichbar?
+□ Ollama läuft?            curl http://localhost:11434
 ```
 
 ### ⚠️ Häufige Probleme
@@ -289,6 +308,8 @@ http://debian-server:3002
 | Monitoring weg | Prometheus down | `systemctl restart prometheus` auf Debian |
 | Netzwerk langsam | Switch/Firewall? | Siehe `Netzwerk/README.md` |
 | Docker voll | Storage nicht geleert | `docker system prune -a` |
+| Ollama antwortet nicht | Service down | Siehe `Proxmox/ai-ml.md` |
+| OpenCL-Fehler | GPU nicht erkannt | `clinfo` prüfen, siehe `Proxmox/ai-ml.md` |
 
 📖 **Ausführlich:** [`Fehlerbehebung/`](./Fehlerbehebung/)
 
@@ -306,6 +327,7 @@ http://debian-server:3002
 | Scrutiny | 8085 | HTTP | Debian Server |
 | CUPS (IPP) | 631 | TCP | print-vm |
 | JetDirect | 9100 | TCP | Digitus |
+| Ollama API | 11434 | HTTP | Proxmox Host |
 | SSH | 22 | TCP | Alle |
 
 ---
@@ -322,4 +344,4 @@ Fehler gefunden? Verbesserungen? Siehe [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 
 ---
 
-**Letztes Update:** 2026-08-13 | **Maintainer:** [@Hoinkkoma](https://github.com/Hoinkkoma)
+**Letztes Update:** 2026-09-02 | **Maintainer:** [@Hoinkkoma](https://github.com/Hoinkkoma)
