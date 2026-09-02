@@ -15,7 +15,7 @@ Moin Moin Leude das ist mein homlap projekt die repro ist ne kleine dokumatirung
 | **📺 Streaming** | [`Docker/`](./Docker/) | Jellyfin, Immich, FileBrowser |
 | **🤖 KI & ML** | [`Proxmox/ai-ml.md`](./Proxmox/ai-ml.md) | Ollama, OpenCL, GPU-Computing |
 | **⚙️ Automation** | [`Proxmox/n8n.md`](./Proxmox/n8n.md) | n8n Workflows, Ablauf-Automation |
-| **💬 Support** | [`Docker/chatwoot-setup.md`](./Docker/chatwoot-setup.md) | ChatWoot, Kundenkommunikation |
+| **💬 Support & Comm.** | [`Docker/chatwoot-setup.md`](./Docker/chatwoot-setup.md) | ChatWoot, Kundenkommunikation |
 
 ---
 
@@ -53,15 +53,17 @@ graph LR
 
 ---
 
-## 📋 Alle Geräte
+## 🖥️ Alle Geräte (Detaillierte Übersicht)
 
-| Gerät | Typ | Beschreibung |
-|---|---|---|
-| Proxmox ThinkCentre Tower PC | Virtualisierungs-Host | VMs, LXC, Docker, OpenCL, Ollama, n8n |
-| Debian Server (Mini-PC) | Monitoring & Verwaltung | Prometheus, Grafana, Loki, Cockpit, ChatWoot |
-| Digitus Print Server | Print-Gateway | CUPS, HP OfficeJet |
-| ThinkPad T490s | Admin-Laptop | SSH, Verwaltung |
-| Nothing Phone 3a | Smartphone | Mobilgerät |
+| Gerät | Typ | Spezifikation | Funktion | Services |
+|---|---|---|---|---|
+| **Proxmox ThinkCentre Tower PC** | Virtualisierungs-Host | Intel CPU, 16-32GB RAM, SSD | Zentrale Compute-Plattform | VMs, LXC Container, Docker, OpenCL, Ollama, n8n, print-vm |
+| **Debian Server (Mini-PC)** | Monitoring & Verwaltung | ARM/x86, 4-8GB RAM | Zentrale Überwachung & Verwaltung | Prometheus, Grafana, Loki, Cockpit, Uptime Kuma, Scrutiny, ChatWoot |
+| **Digitus Print Server** | Print-Gateway | Standalone Device | Druck-Management | CUPS Server, HP OfficeJet Verbindung, JetDirect (Port 9100) |
+| **ThinkPad T490s** | Admin-Laptop | Intel i7, 16GB RAM | Administrative Aufgaben | SSH, Remote Desktop, Web-UI Zugriff |
+| **HP OfficeJet 4558** | Drucker | USB + Netzwerk-fähig | Druck & Scan | Verbunden über Digitus Printserver |
+| **Nothing Phone 3a** | Smartphone | ARM64 | Mobile Zugriff | VPN, Apps, Benachrichtigungen |
+| **ThinkBook** | Allgemeines Laptop | Intel/AMD | Allgemeine Nutzung | Webzugriff, SSH, Entwicklung |
 
 ---
 
@@ -96,41 +98,149 @@ graph LR
 
 ---
 
-## 📁 Dokumentation
+## 📁 Dokumentation (Kompakt & Ausführlich)
 
-### 🐧 **Debian Server**
+### 🐧 **Debian Server** — Monitoring & Verwaltung
 ```
-Debian-Monitoring/README.md  — Monitoring Setup
-Debian/README.md             — Services & Config
-Debian/config/               — Systemd, Netzwerk, Firewall
-```
+Debian-Monitoring/README.md
+├─ Prometheus Setup & Konfiguration
+├─ Grafana Dashboards & Datasources
+├─ Loki Log-Aggregation
+├─ Uptime Kuma Service-Monitoring
+├─ Scrutiny S.M.A.R.T. Überwachung
+└─ Cockpit Webbasierte Verwaltung
 
-### 🖥️ **Proxmox VE**
-```
-Proxmox/README.md            — VM & Container Management
-Proxmox/printer-vm.md        — Print-Gateway Setup
-Proxmox/ai-ml.md             — Ollama & OpenCL
-Proxmox/n8n.md               — n8n Workflow-Automatisierung
-```
+Debian/README.md
+├─ SSH & SSH-Key Setup
+├─ NTP & Zeit-Synchronisierung
+├─ DNS-Caching mit unbound
+├─ Syslog & Log-Management
+└─ Firewall & iptables Config
 
-### 🐳 **Docker & Anwendungen**
-```
-Docker/README.md             — Docker & Portainer
-Docker/chatwoot-setup.md     — ChatWoot Installation
-docs/apps.md                 — Alle Services im Überblick
-```
-
-### 🌐 **Netzwerk**
-```
-Netzwerk/README.md           — Netzwerk-Architektur
-Netzwerk/network-diagram.md  — Topologie
-Netzwerk/printserver-digitus.md  — Printserver-Config
+Debian/config/
+├─ systemd Services
+├─ Netzwerk-Konfiguration
+├─ Firewall-Regeln
+└─ Update-Strategie
 ```
 
-### 🔧 **Wartung & Support**
+### 🖥️ **Proxmox VE** — Virtualisierung & Automation
 ```
-Wartung/                     — Regelmäßige Aufgaben
-Fehlerbehebung/              — Troubleshooting
+Proxmox/README.md
+├─ Proxmox Installation & Setup
+├─ VMs & LXC Container erstellen
+├─ VM-Management & Live-Migration
+├─ Storage-Konfiguration
+├─ Netzwerk-Bridges (vmbr0, vmbr1)
+└─ USB-Passthrough & Hardware
+
+Proxmox/printer-vm.md
+├─ print-vm LXC Container Setup
+├─ CUPS Installation & Konfiguration
+├─ Drucker-Verbindung & Einrichtung
+├─ IPP-Protokoll Einrichtung
+└─ Troubleshooting Print-Probleme
+
+Proxmox/ai-ml.md
+├─ OpenCL Setup & GPU-Erkennung
+├─ Ollama Installation & Konfiguration
+├─ qwull-Modell laden & verwenden
+├─ GPU-Speicher Management
+└─ Performance-Optimierung
+
+Proxmox/n8n.md
+├─ n8n Docker Installation
+├─ Workflow-Beispiele
+├─ Integration mit externen Services
+├─ Fehlerbehandlung & Logging
+└─ Backup & Restore
+
+Proxmox/print-worker.service
+└─ Systemd Service für Print-Automation
+```
+
+### 🐳 **Docker & Anwendungen** — Container & Services
+```
+Docker/README.md
+├─ Docker Installation & Setup
+├─ Docker-Compose für Multi-Container
+├─ Portainer UI Verwaltung
+├─ Volume & Netzwerk Management
+└─ Best Practices & Security
+
+Docker/chatwoot-setup.md
+├─ ChatWoot Installation
+├─ Datenbank-Setup (PostgreSQL)
+├─ Kanal-Konfiguration
+├─ Webhooks & Integrationen
+└─ Email-Setup & Notifications
+
+docs/apps.md
+├─ Jellyfin Medienserver Setup
+├─ Immich Foto-Management
+├─ FileBrowser Dateimanager
+├─ Forgejo Git-Server
+├─ Vaultwarden Passwort-Manager
+└─ Weitere Container-Apps
+```
+
+### 🌐 **Netzwerk** — Architektur & Konfiguration
+```
+Netzwerk/README.md
+├─ Netzwerk-Architektur & Topologie
+├─ IP-Adressierung & Subnets
+├─ VPN-Setup & Konfiguration
+├─ Firewall-Regeln
+└─ Netzwerk-Troubleshooting
+
+Netzwerk/network-diagram.md
+├─ Detaillierte Topologie
+├─ VLAN-Konfiguration (wenn vorhanden)
+├─ Routing-Tabellen
+└─ Redundanz & Failover
+
+Netzwerk/printserver-digitus.md
+├─ Digitus Printserver Setup
+├─ Netzwerk-Verbindung
+├─ CUPS-Integration
+└─ HP OfficeJet Konfiguration
+```
+
+### 🔧 **Wartung & Support** — Operationen & Troubleshooting
+```
+Wartung/
+├─ Tägliche Checks & Checklisten
+├─ Wöchentliche Wartungsaufgaben
+├─ Monatliche Sicherheits-Reviews
+├─ Backup & Disaster Recovery
+└─ Update-Strategie & Patches
+
+Fehlerbehebung/
+├─ Häufige Fehler & Lösungen
+├─ Logging & Debugging
+├─ Performance-Issues
+├─ Netzwerk-Probleme
+├─ Service-Recovery
+└─ Emergency Procedures
+```
+
+### 📦 **Ressourcen** — Assets & Meta
+```
+assets/
+├─ Grafiken & Diagramme
+├─ Icons & Logos
+└─ Schablonen
+
+CHANGELOG.md
+└─ Versionshistorie & Updates
+
+CONTRIBUTING.md
+├─ Mitarbeiter-Richtlinien
+├─ Code-Style
+└─ PR-Prozess
+
+LICENSE
+└─ Apache License 2.0
 ```
 
 ---
@@ -148,23 +258,6 @@ Fehlerbehebung/              — Troubleshooting
 
 ---
 
-## 🔗 Wichtige Ports & URLs
-
-| Service | Port | URL | Host |
-|---|---:|---|---|
-| **Grafana** | 3002 | `http://debian:3002` | Debian |
-| **Prometheus** | 9091 | `http://debian:9091` | Debian |
-| **Loki** | 3100 | `http://debian:3100` | Debian |
-| **Cockpit** | 9090 | `https://debian:9090` | Debian |
-| **Ollama API** | 11434 | `http://proxmox:11434` | Proxmox |
-| **n8n** | 5678 | `http://proxmox:5678` | Docker |
-| **ChatWoot** | 3000 | `http://docker:3000` | Docker |
-| **Jellyfin** | 8096 | `http://docker:8096` | Docker |
-| **CUPS** | 631 | `http://print-vm:631` | print-vm |
-| **SSH** | 22 | `ssh user@host` | Alle |
-
----
-
 ## ✅ Tägliche Checks
 
 ```bash
@@ -175,7 +268,7 @@ Fehlerbehebung/              — Troubleshooting
 □ Druck verfügbar?               CUPS Dashboard
 □ Ollama läuft?                  curl http://proxmox:11434/api/tags
 □ n8n Workflows OK?              n8n Dashboard prüfen
-□ ChatWoot verfügbar?            http://docker:3000
+□ ChatWoot verfügbar?            http://debian:3000
 ```
 
 ---
@@ -219,17 +312,6 @@ Fehlerbehebung/              — Troubleshooting
    - ChatWoot Kanäle setup
 
 **Anleitung:** Siehe jeweilige `README.md` in `Debian-Monitoring/`, `Proxmox/`, `Docker/`
-
----
-
-## 📦 Ressourcen
-
-| Bereich | Dateien |
-|---|---|
-| **Grafiken** | `assets/` |
-| **Versionshistorie** | `CHANGELOG.md` |
-| **Mitarbeit** | `CONTRIBUTING.md` |
-| **Lizenz** | `LICENSE` (Apache 2.0) |
 
 ---
 
