@@ -33,24 +33,37 @@ flowchart LR
       end
       subgraph proxmox["🔶 Proxmox"]
         direction TB
-        subgraph vm["💻 VM"]
-          deb12vm["Debian 12"]
-        end
-        subgraph lxc["📦 Container LXC"]
-          deb12ct["Debian 12"]
-        end
         subgraph storage["💾 Storage"]
           zfs["ZFS Pool"]
           subgraph programs["📂 Programme"]
             tailscale_px["Tailscale"]
             pihole_px["Pi-Hole"]
-            immich_px["Immich"]
             ittools_px["IT-Tools"]
             netdata_px["Netdata"]
             clam_px["ClamAV"]
           end
         end
+        subgraph docker_cont["🐳 Docker Container"]
+          jellyfin["Jellyfin"]
+          forgejo["Forgejo"]
+          vaultwarden["Vaultwarden"]
+          chatwoot["ChatWoot"]
+        end
+        subgraph ai_ml["🤖 AI/ML"]
+          ollama["Ollama"]
+          opencl["OpenCL"]
+        end
+        subgraph workflow["⚙️ Workflows"]
+          n8n["n8n"]
+        end
       end
+      
+      subgraph digitus_net["🖨️ Digitus Printserver"]
+        digitus["Digitus (LAN)"]
+        hp["HP OfficeJet 4558"]
+        digitus -->|"🔌 USB"| hp
+      end
+
       tailscale_d --> upkuma
       tailscale_d --> ph
       tailscale_d --> homepg
@@ -98,6 +111,7 @@ flowchart LR
 
     fritzbox -->|"🔌 LAN"| tailscale_d
     fritzbox -->|"🔌 LAN"| proxmox
+    fritzbox -->|"🔌 LAN"| digitus
     thinkpad  -->|"🔒 VPN"| tailscale_d
     thinkbook -.->|"🔒 VPN"| tailscale_d
     phone     -.->|"🔒 VPN"| tailscale_d
@@ -121,13 +135,17 @@ flowchart LR
     classDef HomepageStyle fill:#7c2d12,stroke:#f97316,color:#fff7ed;
     classDef StorageStyle fill:#1e3a5f,stroke:#60a5fa,color:#eff6ff;
     classDef ProgramStyle fill:#312e81,stroke:#818cf8,color:#eef2ff;
-    classDef VMStyle fill:#14532d,stroke:#4ade80,color:#f0fdf4;
+    classDef PrintStyle fill:#b45309,stroke:#fbbf24,color:#fffbeb;
+    classDef DockerStyle fill:#2d5016,stroke:#65a30d,color:#f7fee7;
+    classDef AIStyle fill:#5b21b6,stroke:#ec4899,color:#fce7f3;
 
     class fritzbox,phone,buds,watch,thinkbook,tablet,thinkpad ZuhauseStyle;
     class upkuma,ph,homepg HomelabStyle;
-    class deb12vm,deb12ct VMStyle;
     class zfs StorageStyle;
-    class tailscale_px,pihole_px,immich_px,ittools_px,netdata_px,clam_px ProgramStyle;
+    class tailscale_px,pihole_px,ittools_px,netdata_px,clam_px ProgramStyle;
     class drive,gmail,photos,onedrive,auth,github,mermaid_c,steam,battlenet,netflix_c,disney_c,prime_c,music,youtube_c,discord,reddit_c CloudStyle;
     class tailscale_d VpnHubStyle;
     class hp_debian,hp_proxmox,hp_tailscale,hp_pihole,hp_upkuma,hp_youtube,hp_disney,hp_netflix,hp_prime,hp_reddit HomepageStyle;
+    class digitus,hp PrintStyle;
+    class jellyfin,forgejo,vaultwarden,chatwoot DockerStyle;
+    class ollama,opencl AIStyle;
