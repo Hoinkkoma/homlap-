@@ -15,11 +15,12 @@ in der alles kurtz zusammen gefast ist
 4. [Zwei Hauptkategorien](#zwei-hauptkategorien)
    - [🐧 Debian Server](#-debian-server)
    - [🖥️ Proxmox VE](#️-proxmox-ve)
-5. [Netzwerk-Topologie](#netzwerk-topologie)
-6. [Anwendungen & Dienste](#anwendungen--dienste)
-7. [Schnelleinstieg](#schnelleinstieg)
-8. [Dokumentation & Wiki](#dokumentation--wiki)
-9. [Wartung & Support](#wartung--support)
+5. [Homepage Struktur](#homepage-struktur)
+6. [Netzwerk-Topologie](#netzwerk-topologie)
+7. [Anwendungen & Dienste](#anwendungen--dienste)
+8. [Schnelleinstieg](#schnelleinstieg)
+9. [Dokumentation & Wiki](#dokumentation--wiki)
+10. [Wartung & Support](#wartung--support)
    
 ## Alle Geräte
 
@@ -49,6 +50,8 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
 - ✅ **KI & Machine Learning** (OpenCL, Ollama mit qwull-Modell)
 - ✅ **Anwendungen** (Jellyfin, Forgejo, Immich, uvm.)
 - ✅ **Druckinfrastruktur** (CUPS → Printserver → Drucker)
+- ✅ **Automatisierung & Workflows** (n8n für Ablaufautomatisierung)
+- ✅ **Kundenkommunikation** (ChatWoot für Support & Messaging)
 - ✅ **Verwaltung & Troubleshooting** Tools
 
 ---
@@ -56,9 +59,9 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
 ## Architektur (Grafisch)
 
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│                    Hoinkkoma Homelab                              │
-└────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                    Hoinkkoma Homelab                                   │
+└────────────────────────────────────────────────────────────────────────┘
 
                      ┌─────────────────┐
                      │  🌐 INTERNET    │
@@ -81,6 +84,7 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
     │ • print-vm CUPS  │            │ • Uptime Kuma    │
     │ • OpenCL         │            │ • Scrutiny       │
     │ • Ollama (qwull) │            │ • Cockpit        │
+    │ • n8n Workflows  │            │ • ChatWoot       │
     └─────────┬────────┘            └──────────────────┘
               │
       ┌───────┴─────────┐
@@ -93,9 +97,9 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
   │ Forgejo  │    │ Ethernet/Switch   │
   │Vaultwarden    │  to Proxmox Host  │
   │ Immich   │    │                   │
-  └──────────┘    └────────┬──────────┘
-                           │ (USB)
-                  ┌────────▼──────────┐
+  │ n8n      │    └────────┬──────────┘
+  │ChatWoot  │             │ (USB)
+  └──────────┘    ┌────────▼──────────┐
                   │  🖨️ HP OFFICEJET │
                   │      4558        │
                   └──────────────────┘
@@ -130,10 +134,53 @@ Ein **selbstgehostetes Infrastruktur-Ökosystem** mit:
 | **VMs & Container** | LXC Container, VM-Verwaltung | `Proxmox/README.md` |
 | **Print-Gateway** | print-vm (CUPS-Server) | `Proxmox/printer-vm.md` |
 | **Storage & Netzwerk** | vmbr0, vmbr1, USB-Passthrough | `Proxmox/README.md` |
-| **Automatisierung** | Print-Worker, Systemd-Services | `Proxmox/print-worker.service` |
+| **Automatisierung** | Print-Worker, Systemd-Services, n8n Workflows | `Proxmox/print-worker.service` |
 | **KI & Machine Learning** | OpenCL, Ollama mit qwull-Modell | `Proxmox/ai-ml.md` |
+| **Workflow-Automatisierung** | n8n für komplexe Ablaufautomatisierungen | `Proxmox/n8n.md` |
 
 📖 **Detaillierte Anleitung:** [`Proxmox/`](./Proxmox/)
+
+---
+
+## Homepage Struktur
+
+Die Homepage wurde überarbeitet und ist jetzt in **6 sinnvolle Kacheln** unterteilt:
+
+### 🐧 **Debian Server** Kachel
+- Zentrale Verwaltung aller Debian-basierter Systeme
+- Monitoring & Überwachung
+- VPN & Netzwerk-Verwaltung
+- Alle Debian-spezifischen Tools und Services
+
+### 🖥️ **Proxmox** Kachel
+- Virtualisierungs-Host & VM-Management
+- Container-Verwaltung
+- Aktivierung & Verwaltung von Gast-Systemen
+- Digitus Print-Server Integration
+
+### 📺 **Streaming & Medien** Kachel
+- Jellyfin (Medienserver)
+- Video & Audio Streaming
+- Media Management
+- Alle Media-bezogenen Dienste
+
+### 🤖 **KI & Machine Learning** Kachel
+- Ollama LLM-Server
+- OpenCL Compute
+- KI-basierte Anwendungen
+- Modell-Management
+
+### 💬 **Soziale Medien & Kommunikation** Kachel
+- ChatWoot (Customer Support & Messaging)
+- Vaultwarden (Passwort-Management)
+- Forgejo (Git-Server)
+- Soziale Integration & Kommunikationstools
+
+### 💪 **Support & Unterstützung** Kachel
+- Dokumentation & Wiki
+- Fehlerbehandlung & Troubleshooting
+- Wartungs-Checklisten
+- Support-Ressourcen
 
 ---
 
@@ -154,11 +201,13 @@ graph TD
     PROX -->|vmbr0| DOCKER["🐳 Docker Container"]
     PROX -->|vmbr1| PRINT_VM["🐧 print-vm (CUPS)"]
     PROX -->|GPU/Compute| OLLAMA["🤖 Ollama<br/>(qwull-Modell)"]
+    PROX -->|Workflows| N8N["⚙️ n8n<br/>(Automatisierung)"]
     
     DOCKER -->|Services| JELLY["Jellyfin 🎬"]
     DOCKER -->|Services| FORGE["Forgejo 📝"]
     DOCKER -->|Services| VAULT["Vaultwarden 🔐"]
     DOCKER -->|Services| IMMICH["Immich 📸"]
+    DOCKER -->|Services| CHAT["ChatWoot 💬"]
     
     DIGI -->|USB| HP["🖨️ HP OfficeJet 4558"]
     
@@ -169,6 +218,8 @@ graph TD
     style DIGI fill:#e8f5e9
     style HP fill:#c8e6c9
     style OLLAMA fill:#ffe0b2
+    style N8N fill:#ffccbc
+    style CHAT fill:#f8bbd0
 ```
 
 ---
@@ -184,6 +235,16 @@ graph TD
 - **Forgejo** — Self-Hosted Git-Server
 - **Vaultwarden** — Passwortmanager
 - **Portainer** — Docker-Management UI
+
+### Automatisierung & Workflows
+- **n8n** — Workflow-Automatisierung & Ablauf-Orchestrierung
+  - Integration verschiedener Dienste
+  - Automatisierte Prozesse unter Proxmox
+  - Event-getriebene Automation
+- **ChatWoot** — Customer Support & Kundenkommunikation
+  - Multi-Kanal Messaging
+  - Support Ticketing
+  - Team Collaboration
 
 ### KI & Machine Learning
 - **OpenCL** — GPU-Computing & Compute-Beschleunigung
@@ -217,8 +278,10 @@ graph TD
 - [ ] **Monitoring:** Prometheus + Grafana aktivieren
 - [ ] **Druck:** print-vm + Digitus verbinden
 - [ ] **OpenCL & Ollama:** Setup & qwull-Modell laden
+- [ ] **n8n:** Workflows installieren & konfigurieren
+- [ ] **ChatWoot:** Kanal-Setup für Kundenkommunikation
 
-📖 **Anleitung:** `Proxmox/README.md` + `Debian-Monitoring/README.md` + `Proxmox/ai-ml.md`
+📖 **Anleitung:** `Proxmox/README.md` + `Debian-Monitoring/README.md` + `Proxmox/ai-ml.md` + `Proxmox/n8n.md`
 
 ### 2️⃣ Tägliche Wartung
 
@@ -236,6 +299,9 @@ http://debian-server:3002
 
 # Ollama-Status prüfen
 curl http://localhost:11434/api/tags
+
+# n8n Workflows prüfen
+http://proxmox:5678
 ```
 
 📖 **Checklisten:** [`Wartung/`](./Wartung/)
@@ -246,6 +312,8 @@ curl http://localhost:11434/api/tags
 - Druck funktioniert nicht? → [`Proxmox/printer-vm.md`](./Proxmox/printer-vm.md)
 - Netzwerk-Issues? → [`Netzwerk/README.md`](./Netzwerk/)
 - Ollama läuft nicht? → [`Proxmox/ai-ml.md`](./Proxmox/ai-ml.md)
+- n8n Workflows fehlerhafte? → [`Proxmox/n8n.md`](./Proxmox/n8n.md)
+- ChatWoot nicht erreichbar? → [`Docker/README.md`](./Docker/README.md)
 
 ---
 
@@ -263,9 +331,18 @@ curl http://localhost:11434/api/tags
 - `Proxmox/printer-vm.md` — Print-Gateway Setup
 - `Proxmox/print-worker.service` — Systemd-Service
 - `Proxmox/ai-ml.md` — OpenCL & Ollama Setup
+- `Proxmox/n8n.md` — n8n Workflow-Automatisierung
+
+#### ⚙️ Automatisierung & Workflows
+- `Proxmox/n8n.md` — n8n Installation & Workflow-Verwaltung
+- `Proxmox/n8n-workflows/` — Vordefinierte Workflows
+
+#### 💬 Kommunikation & Support
+- `Docker/chatwoot-setup.md` — ChatWoot Installation & Konfiguration
+- `docs/apps.md` — ChatWoot & weitere Apps
 
 #### 🤖 KI & Machine Learning
-- `Proxmox/ai-ml.md` — OpenCL-Konfiguration & Ollama-Installaton
+- `Proxmox/ai-ml.md` — OpenCL-Konfiguration & Ollama-Installation
 
 #### 🌐 Netzwerk
 - `Netzwerk/README.md` — Netzwerk-Architektur
@@ -297,6 +374,8 @@ curl http://localhost:11434/api/tags
 □ Netzwerk stabil?         ping <services>
 □ Druck verfügbar?         Digitus erreichbar?
 □ Ollama läuft?            curl http://localhost:11434
+□ n8n Workflows OK?        Dashboard prüfen
+□ ChatWoot verfügbar?      Kanäle erreichbar?
 ```
 
 ### ⚠️ Häufige Probleme
@@ -310,6 +389,8 @@ curl http://localhost:11434/api/tags
 | Docker voll | Storage nicht geleert | `docker system prune -a` |
 | Ollama antwortet nicht | Service down | Siehe `Proxmox/ai-ml.md` |
 | OpenCL-Fehler | GPU nicht erkannt | `clinfo` prüfen, siehe `Proxmox/ai-ml.md` |
+| n8n nicht erreichbar | Service/Container down | Docker/Proxmox Status prüfen |
+| ChatWoot down | Container nicht aktiv | `docker ps` prüfen, neu starten |
 
 📖 **Ausführlich:** [`Fehlerbehebung/`](./Fehlerbehebung/)
 
@@ -328,6 +409,8 @@ curl http://localhost:11434/api/tags
 | CUPS (IPP) | 631 | TCP | print-vm |
 | JetDirect | 9100 | TCP | Digitus |
 | Ollama API | 11434 | HTTP | Proxmox Host |
+| n8n | 5678 | HTTP | Proxmox / Docker |
+| ChatWoot | 3000 | HTTP | Docker Container |
 | SSH | 22 | TCP | Alle |
 
 ---
