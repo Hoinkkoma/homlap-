@@ -1,117 +1,99 @@
-%%{init: {"theme": "neo-dark", "layout": "elk"}}%%
+%%{init: {"theme": "neo", "layout": "elk", "fontFamily": "arial"}}%%
 flowchart LR
 
-    subgraph Internet["🌐 Internet"]
-        wan["Internet / WAN"]
+    Internet["🌐 Internet"]
+    
+    subgraph Home["🏠 Home Network"]
+        Router["Fritzbox<br/>Gateway"]
+    end
+    
+    subgraph Infrastructure["🖧 Network Infrastructure"]
+        S8["8-Port Switch<br/>Primary"]
+        S4["4-Port Switch<br/>Secondary"]
+        PSU["Surge Protection"]
+    end
+    
+    subgraph Compute["🖥️ Compute Hosts"]
+        PVE["Proxmox Server<br/>i7 / 32GB RAM<br/>2×256GB + 500GB SSD"]
+        DEB["Debian Server<br/>i3 / 16GB RAM<br/>256GB SSD"]
+        DIT["Debian IT<br/>Pentium / 2GB RAM"]
+    end
+    
+    subgraph Storage["💾 Storage & Virtualization"]
+        ZFS["ZFS Pool"]
+        VMS["Virtual Machines"]
+        CONT["Docker Containers"]
+    end
+    
+    subgraph Services["☁️ Services"]
+        DNS["AdGuard Home<br/>DNS/Filtering"]
+        DASH["Homepage<br/>Dashboard"]
+        MON["Prometheus/Grafana<br/>Monitoring"]
+        MEDIA["Jellyfin<br/>Media Server"]
+        CLOUD["Nextcloud<br/>File Storage"]
+        ADMIN["Portainer<br/>Container Admin"]
+    end
+    
+    subgraph Print["🖨️ Print Zone"]
+        PRINT["Digitus Printserver"]
+        HP["HP OfficeJet 400"]
+    end
+    
+    subgraph VPN["🔒 Remote Access"]
+        TS["Tailscale VPN"]
+        C1["Think Client 1"]
+        C2["Think Client 2"]
+        C3["Think Client 3"]
     end
 
-    subgraph Router["🏠 Zuhause"]
-        fritzbox["Fritzbox<br/>Router / Gateway"]
-    end
+    Internet --> Router
+    Router --> S8
+    S8 --> S4
+    S8 --> PSU
+    
+    S8 --> PVE
+    S8 --> DEB
+    S8 --> DIT
+    S8 --> PRINT
+    
+    PVE --> ZFS
+    ZFS --> VMS
+    VMS --> CONT
+    
+    PVE --> DNS
+    PVE --> DASH
+    PVE --> MON
+    PVE --> MEDIA
+    PVE --> CLOUD
+    PVE --> ADMIN
+    
+    DEB --> DNS
+    DEB --> DASH
+    DEB --> MON
+    
+    PRINT --> HP
+    
+    S8 <--> TS
+    TS -.-> C1
+    TS -.-> C2
+    TS -.-> C3
+    
+    Services -.-> Internet
 
-    subgraph Network["🖧 Netzwerk-Infrastruktur"]
-        switch8["8-Port Switch<br/>Zentraler Netzumschalter"]
-        switch4["4-Port Switch<br/>Erweiterung / Proxmox-Zweig"]
-        surge["Überspannungsschutz<br/>8-fach Steckdosenleiste"]
-        sw1["Unmanaged Switch 1"]
-        sw2["Unmanaged Switch 2"]
-    end
+    classDef internet fill:#0d47a1,stroke:#1976d2,color:#e3f2fd
+    classDef home fill:#e65100,stroke:#ff6f00,color:#fff3e0
+    classDef network fill:#263238,stroke:#455a64,color:#eceff1
+    classDef compute fill:#004d40,stroke:#00897b,color:#e0f2f1
+    classDef storage fill:#1a237e,stroke:#3f51b5,color:#e8eaf6
+    classDef services fill:#4a148c,stroke:#6a1b9a,color:#f3e5f5
+    classDef print fill:#3f2c2c,stroke:#795548,color:#efebe9
+    classDef vpn fill:#004d2d,stroke:#00897b,color:#e0f2f1
 
-    subgraph Hosts["🖥️ Hosts & Server"]
-        proxmox["Proxmox Server<br/>Lenovo ThinkCenter Tiny 2016<br/>i7 / 32 GB RAM / 2×256 GB SSD + 500 GB SSD"]
-        debian["Debian Server<br/>Lenovo Mini ThinkCenter 2014<br/>i3 / 16 GB RAM / 256 GB SATA SSD"]
-        debianit["Debian IT<br/>iMac 2006<br/>Pentium / 2 GB RAM"]
-    end
-
-    subgraph Services["🐳 Dienste / Docker"]
-        home["Homepage<br/>Dashboard"]
-        adguard["AdGuard Home<br/>DNS-Filter"]
-        portainer["Portainer<br/>Container Admin"]
-        monitor["Prometheus + Grafana<br/>Monitoring"]
-        jellyfin["Jellyfin<br/>Medienserver"]
-        nextcloud["Nextcloud<br/>Persönliche Daten"]
-    end
-
-    subgraph PrintZone["🖨️ Drucker & Printserver"]
-        digitus["Digitus Print Server"]
-        hp["HP OfficeJet 400<br/>Jetdirect"]
-    end
-
-    subgraph Remote["🔒 Fernzugriff / VPN"]
-        tailscale["Tailscale VPN"]
-        tc1["ThinkClient 1"]
-        tc2["ThinkClient 2"]
-        tc3["ThinkClient 3"]
-    end
-
-    subgraph ProxmoxInt["💾 Proxmox Intern"]
-        zfs["ZFS Pool"]
-        vms["VMs / Container"]
-        ollama["Ollama + GPU\nKI-Workloads"]
-    end
-
-    %% Internet und Router
-    wan --> fritzbox
-    fritzbox --> switch8
-
-    %% Netzwerk-Switches
-    switch8 --> switch4
-    switch8 --> surge
-    switch8 -.-> sw1
-    switch8 -.-> sw2
-
-    %% Hosts und Server
-    switch8 --> proxmox
-    switch8 --> debian
-    switch8 --> debianit
-    switch8 --> digitus
-
-    %% Proxmox intern
-    proxmox --> zfs
-    zfs --> vms
-    vms --> ollama
-
-    %% Dienste
-    proxmox -->|Docker / Swarm| home
-    proxmox -->|Docker / Swarm| adguard
-    proxmox -->|Docker / Swarm| portainer
-    proxmox -->|Docker / Swarm| monitor
-    proxmox -->|Docker / Swarm| jellyfin
-    proxmox -->|Docker / Swarm| nextcloud
-
-    debian -->|Infrastruktur / Monitoring| home
-    debian -->|DNS + Services| adguard
-    debian -->|System Services| portainer
-    debian -->|Log-/Metrics-Host| monitor
-
-    %% Printzone
-    digitus --> hp
-
-    %% Remote Access
-    switch8 <-->|VPN Tunnel| tailscale
-    tailscale -.-> tc1
-    tailscale -.-> tc2
-    tailscale -.-> tc3
-
-    %% Optional: Internet access for services
-    home -.->|Internet| wan
-    adguard -.->|DNS-Upstream| wan
-    monitor -.->|Internet / Services| wan
-
-    classDef router fill:#7c2d12,stroke:#f97316,color:#fff7ed;
-    classDef network fill:#1e293b,stroke:#94a3b8,color:#f8fafc;
-    classDef host fill:#064e3b,stroke:#34d399,color:#ecfdf5;
-    classDef service fill:#431407,stroke:#f59e0b,color:#fefce8;
-    classDef print fill:#4c1d95,stroke:#a78bfa,color:#f5f3ff;
-    classDef remote fill:#065f46,stroke:#2dd4bf,color:#ecfdf5;
-    classDef storage fill:#1f2937,stroke:#9ca3af,color:#f9fafb;
-    classDef internet fill:#1d4ed8,stroke:#60a5fa,color:#eff6ff;
-
-    class wan internet;
-    class fritzbox router;
-    class switch8,switch4,surge,sw1,sw2 network;
-    class proxmox,debian,debianit host;
-    class home,adguard,portainer,monitor,jellyfin,nextcloud service;
-    class digitus,hp print;
-    class tailscale,tc1,tc2,tc3 remote;
-    class zfs,vms,ollama storage;
+    class Internet internet
+    class Router home
+    class S8,S4,PSU network
+    class PVE,DEB,DIT compute
+    class ZFS,VMS,CONT storage
+    class DNS,DASH,MON,MEDIA,CLOUD,ADMIN services
+    class PRINT,HP print
+    class TS,C1,C2,C3 vpn
