@@ -4,13 +4,13 @@
 **Maintainer:** @Hoinkkoma  
 **Zweck:** Zentrale technische Dokumentation und Projektkontext für Hardware, Dienste, Sicherheitsmaßnahmen, Monitoring und zukünftige Erweiterungen.
 
-> Hinweis: Diese Dokumentation ist bewusst auf generische, sichere Konfigurationshinweise reduziert. Konkrete interne IP-Adressen und produktive Netzdaten werden lokal, separat und nur mit Freigabe verwaltet.
+> Hinweis: Diese Dokumentation ist bewusst auf generische, sichere Konfigurationshinweise reduziert. Konkrete interne IP-Adressen und produktive Netzdaten werden lokal, separat und nur mit Freigabe gepflegt.
 
 ---
 
 ## 1. Projektübersicht
 
-Das Homelab basiert auf einer selbst betriebenen Infrastruktur aus Proxmox VE, Debian, Docker und Docker Swarm. Ziel ist ein stabiler, dokumentierter Betrieb mit Fokus auf Datensicherheit, Verwaltung, Monitoring, Medien und Backup-Strategie.
+Das Homelab basiert auf einer selbst betriebenen Infrastruktur aus Proxmox VE, Debian, Docker und Docker Swarm. Ziel ist ein stabiler, dokumentierter Betrieb mit Fokus auf Datensicherheit, Verwaltung und Skalierbarkeit.
 
 Wichtige Bereiche:
 
@@ -43,29 +43,48 @@ Wichtige Bereiche:
 
 ## 2. Infrastruktur
 
-### Proxmox-Tower
+### Hardware-Übersicht
 
-- Rolle: leistungsstarker Proxmox-Host, Docker-Swarm-Manager und GPU-Node
-- Hypervisor: Proxmox VE
-- Speicher: ZFS-basierter Systempool
-- GPU: NVIDIA Quadro P400 oder vergleichbare GPU-Klasse
-- Aufgabe: Virtualisierung, Container, KI-Workloads, Medien- und Monitoring-Services
+#### Proxmox Server
+- **Hardware:** Lenovo ThinkCenter Tiny aus 2016
+- **CPU:** Intel Core i7
+- **RAM:** 32 GB
+- **Storage:** zwei 256 GB SATA-SSDs + eine 500 GB externe SSD
+- **Rolle:** leistungsstarker Proxmox-Host, Docker-Swarm-Manager und GPU-Node
+- **Hypervisor:** Proxmox VE
+- **Speicher:** ZFS-basierter Systempool
+- **GPU:** NVIDIA Quadro P400 oder vergleichbare GPU-Klasse
+- **Aufgabe:** Virtualisierung, Container, KI-Workloads, Medien- und Monitoring-Services
 
-### Debian-Server
+#### Debian Server
+- **Hardware:** Lenovo ThinkCenter Mini aus 2014
+- **CPU:** Intel Core i3
+- **RAM:** 16 GB
+- **Storage:** 256 GB SATA-SSD
+- **Rolle:** dauerhaft laufender Infrastrukturserver
+- **Aufgabe:** zentrale Dienste, Monitoring, Netzwerkinfrastruktur, Verwaltung
+- **Anforderungen:** hoher Verfügbarkeitsanspruch, Stromsparfunktionen kontrolliert, kein ungewollter Shutdown
 
-- Rolle: dauerhaft laufender Infrastrukturserver
-- Aufgabe: zentrale Dienste, Monitoring, Netzwerkinfrastruktur, Verwaltung
-- Anforderungen: hoher Verfügbarkeitsanspruch, Stromsparfunktionen kontrolliert, kein ungewollter Shutdown
+#### Debian IT (iMac)
+- **Hardware:** iMac aus 2006
+- **CPU:** Intel Pentium
+- **RAM:** 2 GB
+- **Rolle:** zusätzlicher Swarm-Worker / leichtere Testaufgaben
+- **Aufgabe:** leichtere Container, Tests und einfache Monitoring-Agenten
 
-### Debian-Node
+#### HP ProDesk 400 G5 SFF
+- **Status:** als späterer Ausbaukandidat für weitere Infra-Kapazität vorgesehen
+- **Aufgaben:** zusätzlicher Proxmox-Node, Erweiterung des Clusters, Backup-/Testumgebung
 
-- Rolle: zusätzlicher Swarm-Worker
-- Aufgabe: leichtere Container, Testdienste und einfache Monitoring-Agenten
+### Netzwerk-Hardware
 
-### HP ProDesk 400 G5 SFF
-
-- Status: als späterer Ausbaukandidat für weitere Infra-Kapazität vorgesehen
-- Aufgaben: zusätzlicher Proxmox-Node, Erweiterung des Clusters, Backup-/Testumgebung
+- **8-Port Switch:** verbunden mit Internet und beiden Debian-Servern (direkt)
+- **4-Port Switch:** verbunden mit dem 8-Port Switch, dient als Erweiterung für Proxmox-Server und zukünftige Proxmox-Cluster-Verbindungen und drei Think Clients
+- **Überspannungsschutz:** 8-fach Steckdosenleiste
+- **Weitere Komponenten:**
+  - zwei unmenaged Switches
+  - Hewlett Packard Jetdirect 400 Drucker
+  - Digitus Print Server
 
 ---
 
@@ -276,52 +295,7 @@ Prioritäten beim Hardwarekauf:
 
 ---
 
-## 11. Arbeitsweise für GitHub Copilot
-
-Copilot nutzt dieses Repository als Projektkontext und sollte bei Änderungen immer diese Regeln beachten:
-
-### Vor jeder Änderung
-
-1. Ist-Zustand erfassen
-2. Betroffene Hosts, Container, Volumes und Netzwerke identifizieren
-3. Abhängigkeiten und Auswirkungen prüfen
-4. Backup- und Rollback-Möglichkeiten absichern
-5. Plan und konkrete Befehle vor einem Einsatz präsentieren
-6. Riskante Änderungen erst nach freier Zustimmung durchführen
-
-### Bei Shell-Skripten
-
-- robuste, nachvollziehbare Bash-Skripte
-- `set -Eeuo pipefail` für kritische Skripte
-- sensible Eingaben validieren
-- Änderungen möglichst idempotent gestalten
-- Backups vor Änderungen an bestehenden Dateien
-- keine Passwörter, Tokens oder Private Keys in Commits
-
-### Bei Docker
-
-- Volumes und persistente Daten schützen
-- zwischen eigenständigen Containern und Swarm-Services unterscheiden
-- keine unkontrollierten Löschen von Volumes, Netzwerken oder Images
-- Ressourcenlimits und Platzierungsregeln dokumentieren
-
-### Bei Proxmox und Storage
-
-- keine Datenträger formatieren oder partitionieren ohne Freigabe
-- interne Systemdatenträger schützen
-- Geräte nach Modell, UUID, Mountstatus und Funktion prüfen
-- keine ungetesteten Änderungen an produktiven VMs
-
-### Bei KI-Agenten
-
-- Prinzip der minimalen Rechte
-- read-only als Standard
-- kritische Aktionen erst mit Genehmigung
-- keine unkontrollierte Übertragung sensibler Daten an externe Anbieter
-
----
-
-## 12. Repo-Übersicht
+## 11. Repo-Übersicht
 
 - `README.md` – zentrale Übersicht und Projektkontext
 - `Debian-Monitoring/` – Monitoring und Management
