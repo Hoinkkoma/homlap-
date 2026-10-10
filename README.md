@@ -46,7 +46,7 @@ Wichtige Bereiche:
 ### Hardware-Übersicht
 
 #### Proxmox Server
-- **Hardware:** Lenovo ThinkCenter Tiny aus 2016
+- **Hardware:** Lenovo ThinkCenter Tower aus 2016
 - **CPU:** Intel Core i7
 - **RAM:** 32 GB
 - **Storage:** zwei 256 GB SATA-SSDs + eine 500 GB externe SSD
