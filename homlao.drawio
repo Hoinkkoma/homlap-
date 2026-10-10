@@ -2,136 +2,116 @@
 flowchart LR
 
     subgraph Internet["🌐 Internet"]
+        wan["Internet / WAN"]
     end
 
-    subgraph Zuhause["🏠 Zuhause-Router"]
-        direction TB
-        fritzbox[("🔴 Router Fritzbox<br/>WAN-Zugang")]
+    subgraph Router["🏠 Zuhause"]
+        fritzbox["Fritzbox<br/>Router / Gateway"]
     end
 
-    subgraph NetworkSwitch["🖧 Netzwerk-Infrastruktur"]
-        direction TB
-        switch8["8-Port Gigabit Switch<br/>(Zentral verbunden)"]
-        switch4["4-Port Switch<br/>(Erweiterung)"]
-        
-        subgraph Protections["🔌 Schutz & Zubehör"]
-            surge["8-fach Überspannungsschutz"]
-            unmanaged1["Unmanaged Switch 1"]
-            unmanaged2["Unmanaged Switch 2"]
-        end
-
-        switch8 --> switch4
-        switch8 --> surge
-        switch8 -.-> unmanaged1
-        switch8 -.-> unmanaged2
+    subgraph Network["🖧 Netzwerk-Infrastruktur"]
+        switch8["8-Port Switch<br/>Zentraler Netzumschalter"]
+        switch4["4-Port Switch<br/>Erweiterung / Proxmox-Zweig"]
+        surge["Überspannungsschutz<br/>8-fach Steckdosenleiste"]
+        sw1["Unmanaged Switch 1"]
+        sw2["Unmanaged Switch 2"]
     end
 
-    subgraph Server["🖥️ Server & Hosts"]
-        direction TB
-        
-        subgraph Proxmox_Server["⚙️ Proxmox Server<br/>(Lenovo ThinkCenter Tiny 2016)"]
-            px_cpu["Intel Core i7"]
-            px_ram["32 GB RAM"]
-            px_storage["2×256GB SATA SSD<br/>+ 500GB ext. SSD"]
-            px_role["Hypervisor, Docker Manager<br/>GPU-Node, KI-Workloads"]
-        end
-
-        subgraph Debian_Server["🐧 Debian Server<br/>(Lenovo ThinkCenter Mini 2014)"]
-            deb_cpu["Intel Core i3"]
-            deb_ram["16 GB RAM"]
-            deb_storage["256 GB SATA SSD"]
-            deb_role["Infrastruktur-Hub<br/>Monitoring, DNS, VPN"]
-        end
-
-        subgraph Debian_IT["💻 Debian IT<br/>(iMac 2006)"]
-            it_cpu["Intel Pentium"]
-            it_ram["2 GB RAM"]
-            it_storage["minimal"]
-            it_role["Test-/Light-Workloads<br/>Swarm-Worker"]
-        end
+    subgraph Hosts["🖥️ Hosts & Server"]
+        proxmox["Proxmox Server<br/>Lenovo ThinkCenter Tiny 2016<br/>i7 / 32 GB RAM / 2×256 GB SSD + 500 GB SSD"]
+        debian["Debian Server<br/>Lenovo Mini ThinkCenter 2014<br/>i3 / 16 GB RAM / 256 GB SATA SSD"]
+        debianit["Debian IT<br/>iMac 2006<br/>Pentium / 2 GB RAM"]
     end
 
-    subgraph Docker_Services["🐳 Docker Swarm Services"]
-        direction TB
-        homepg["Homepage<br/>(Dashboard)"]
-        adguard["AdGuard Home<br/>(DNS-Filter)"]
-        portainer["Portainer<br/>(Container-Mgmt)"]
-        monitoring["Prometheus/Grafana<br/>(Monitoring)"]
-        jellyfin["Jellyfin<br/>(Media-Server)"]
-        nextcloud["Nextcloud<br/>(Persönliche Daten)"]
+    subgraph Services["🐳 Dienste / Docker"]
+        home["Homepage<br/>Dashboard"]
+        adguard["AdGuard Home<br/>DNS-Filter"]
+        portainer["Portainer<br/>Container Admin"]
+        monitor["Prometheus + Grafana<br/>Monitoring"]
+        jellyfin["Jellyfin<br/>Medienserver"]
+        nextcloud["Nextcloud<br/>Persönliche Daten"]
     end
 
-    subgraph Print_Network["🖨️ Druck-Zone"]
-        direction TB
-        digitus["Digitus Print Server<br/>(LAN-Verbindung)"]
-        hp_jet["HP OfficeJet 400<br/>Jetdirect Drucker"]
-        digitus --> hp_jet
+    subgraph PrintZone["🖨️ Drucker & Printserver"]
+        digitus["Digitus Print Server"]
+        hp["HP OfficeJet 400<br/>Jetdirect"]
     end
 
-    subgraph Remote_Access["🔒 Fernzugriff & VPN"]
-        direction TB
-        tailscale["Tailscale VPN<br/>(Netzwerk-Overlay)"]
-        thinkclient1["ThinkClient 1"]
-        thinkclient2["ThinkClient 2"]
-        thinkclient3["ThinkClient 3"]
+    subgraph Remote["🔒 Fernzugriff / VPN"]
+        tailscale["Tailscale VPN"]
+        tc1["ThinkClient 1"]
+        tc2["ThinkClient 2"]
+        tc3["ThinkClient 3"]
     end
 
-    subgraph Proxmox_Internal["💾 Proxmox Intern"]
-        direction TB
-        zfs["ZFS Storage Pool<br/>(Systemdaten)"]
-        vms["VMs & Container"]
-        ollama["Ollama KI<br/>(GPU-beschleunigt)"]
+    subgraph ProxmoxInt["💾 Proxmox Intern"]
+        zfs["ZFS Pool"]
+        vms["VMs / Container"]
+        ollama["Ollama + GPU\nKI-Workloads"]
     end
 
-    %% Verbindungen Internet
-    Internet -.->|WLAN/LAN| fritzbox
-    fritzbox -->|🔌 LAN Kabel| switch8
+    %% Internet und Router
+    wan --> fritzbox
+    fritzbox --> switch8
 
-    %% Switch-Verbindungen
-    switch8 -->|direkt| Debian_Server
-    switch8 -->|direkt| Proxmox_Server
-    switch8 -->|via 4-Port| Proxmox_Server
-    switch8 -->|via 4-Port| Debian_IT
-    switch8 -->|LAN| Print_Network
+    %% Netzwerk-Switches
+    switch8 --> switch4
+    switch8 --> surge
+    switch8 -.-> sw1
+    switch8 -.-> sw2
 
-    %% Remote Access
-    switch8 <-->|VPN-Tunnel| tailscale
-    tailscale -.-> thinkclient1
-    tailscale -.-> thinkclient2
-    tailscale -.-> thinkclient3
+    %% Hosts und Server
+    switch8 --> proxmox
+    switch8 --> debian
+    switch8 --> debianit
+    switch8 --> digitus
 
-    %% Docker Services auf Proxmox/Debian
-    Debian_Server -.->|Swarm-Worker| Docker_Services
-    Proxmox_Server -.->|Swarm-Manager| Docker_Services
-
-    %% Proxmox interne Struktur
-    Proxmox_Server --> Proxmox_Internal
-    Proxmox_Internal --> zfs
+    %% Proxmox intern
+    proxmox --> zfs
     zfs --> vms
     vms --> ollama
 
-    %% Cloud/Internet für Services
-    Docker_Services -.->|Internet| Internet
+    %% Dienste
+    proxmox -->|Docker / Swarm| home
+    proxmox -->|Docker / Swarm| adguard
+    proxmox -->|Docker / Swarm| portainer
+    proxmox -->|Docker / Swarm| monitor
+    proxmox -->|Docker / Swarm| jellyfin
+    proxmox -->|Docker / Swarm| nextcloud
 
-    %% Styling
-    classDef Internet fill:#1e40af,stroke:#3b82f6,color:#f0f9ff;
-    classDef RouterStyle fill:#7c2d12,stroke:#ea580c,color:#fff7ed;
-    classDef SwitchStyle fill:#1e293b,stroke:#64748b,color:#f1f5f9;
-    classDef ProtectionStyle fill:#3d0915,stroke:#ec4899,color:#fff1f8;
-    classDef ProxmoxStyle fill:#064e3b,stroke:#10b981,color:#ecfdf5;
-    classDef DebianStyle fill:#1e3a8a,stroke:#3b82f6,color:#eff6ff;
-    classDef DockerStyle fill:#431407,stroke:#f59e0b,color:#fefce8;
-    classDef PrintStyle fill:#5b21b6,stroke:#a78bfa,color:#faf5ff;
-    classDef TailscaleStyle fill:#047857,stroke:#14b8a6,color:#f0fdfa;
-    classDef StorageStyle fill:#1f2937,stroke:#9ca3af,color:#f9fafb;
+    debian -->|Infrastruktur / Monitoring| home
+    debian -->|DNS + Services| adguard
+    debian -->|System Services| portainer
+    debian -->|Log-/Metrics-Host| monitor
 
-    class Internet InternetStyle;
-    class fritzbox RouterStyle;
-    class switch8,switch4 SwitchStyle;
-    class surge,unmanaged1,unmanaged2 ProtectionStyle;
-    class Proxmox_Server,Proxmox_Internal,px_cpu,px_ram,px_storage,px_role ProxmoxStyle;
-    class Debian_Server,Debian_IT,deb_cpu,deb_ram,deb_storage,deb_role,it_cpu,it_ram,it_storage,it_role DebianStyle;
-    class Docker_Services,homepg,adguard,portainer,monitoring,jellyfin,nextcloud DockerStyle;
-    class Print_Network,digitus,hp_jet PrintStyle;
-    class Remote_Access,tailscale,thinkclient1,thinkclient2,thinkclient3 TailscaleStyle;
-    class zfs,vms,ollama StorageStyle;
+    %% Printzone
+    digitus --> hp
+
+    %% Remote Access
+    switch8 <-->|VPN Tunnel| tailscale
+    tailscale -.-> tc1
+    tailscale -.-> tc2
+    tailscale -.-> tc3
+
+    %% Optional: Internet access for services
+    home -.->|Internet| wan
+    adguard -.->|DNS-Upstream| wan
+    monitor -.->|Internet / Services| wan
+
+    classDef router fill:#7c2d12,stroke:#f97316,color:#fff7ed;
+    classDef network fill:#1e293b,stroke:#94a3b8,color:#f8fafc;
+    classDef host fill:#064e3b,stroke:#34d399,color:#ecfdf5;
+    classDef service fill:#431407,stroke:#f59e0b,color:#fefce8;
+    classDef print fill:#4c1d95,stroke:#a78bfa,color:#f5f3ff;
+    classDef remote fill:#065f46,stroke:#2dd4bf,color:#ecfdf5;
+    classDef storage fill:#1f2937,stroke:#9ca3af,color:#f9fafb;
+    classDef internet fill:#1d4ed8,stroke:#60a5fa,color:#eff6ff;
+
+    class wan internet;
+    class fritzbox router;
+    class switch8,switch4,surge,sw1,sw2 network;
+    class proxmox,debian,debianit host;
+    class home,adguard,portainer,monitor,jellyfin,nextcloud service;
+    class digitus,hp print;
+    class tailscale,tc1,tc2,tc3 remote;
+    class zfs,vms,ollama storage;
