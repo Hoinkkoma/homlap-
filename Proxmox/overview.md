@@ -1,29 +1,52 @@
 # Proxmox — Kategorie Übersicht
 
-moin — Diese Unterseite fasst alles zusammen, was mit dem Proxmox Host zu tun hat.
+Diese Seite fasst die Proxmox-bezogenen Themen des Homelabs zusammen.
 
-Kurz:
-- Proxmox ist der zentrale Host für VMs, LXC und Docker.
-- Druck‑VMs (print-vm) laufen auf Proxmox; einige Hardware‑Ports (Digitus) sind physisch am Host angeschlossen.
+---
 
-Wichtige Dateien (Unterkategorien)
-- Proxmox/README.md — ausführliche Proxmox‑Doku (bestehend)
-- Proxmox/printer-vm.md — Einrichtung der Debian Print‑VM (CUPS)
-- Proxmox/print-worker.service — Systemd Service für Print‑Worker
-- Proxmox/hp-officejet-4658.md — Drucker‑spezifische Hinweise
+## Kurzbeschreibung
 
-Kurze Beschreibung der Proxmox‑bezogenen Anwendungen
-- print-vm (CUPS): Print‑Gateway VM, nimmt Druckaufträge entgegen und leitet an Digitus weiter.
-- print-worker (Script + Service): Kleine Wrapper/Watcher, der PDFs aus einem Drop‑Folder an lp übergibt.
+Proxmox ist die zentrale Hypervisor- und Virtualisierungsbasis für das Homelab. Es verwaltet VMs, LXC Container, Storage, Netzwerke und wichtige Service-Umgebungen.
 
-Schaubild (Mermaid)
+---
+
+## Wichtige Themen
+
+- Proxmox-Host und Base-Umgebungen
+- VM- und Container-Management
+- Storage- und Backup-Strategie
+- Print- und Drucker-Integrationen
+- Monitoring- und Verwaltungsdienste
+- Sicherheits- und Netzwerkanforderungen
+
+---
+
+## Wichtige Dateien
+
+- `Proxmox/README.md` — allgemeine Proxmox-Dokumentation
+- `Proxmox/printer-vm.md` — Einrichtung einer Debian-Print-VM
+- `Proxmox/hp-officejet-4658.md` — Drucker- und Printserver-Details
+- `Proxmox/print-worker.service` — Systemd-Service für Print-Worker
+
+---
+
+## Architekturüberblick
 
 ```mermaid
-%% assets/proxmox-zone.mmd
 flowchart LR
-  Proxmox[Proxmox Host]\n  Proxmox --> VM_PRINT[print-vm (Debian/CUPS)]
-  Proxmox --> VM_MON[Debian Monitoring]
-  Proxmox --> Docker[Docker / Portainer (Apps)]
-  VM_PRINT --> Digitus[switch / Digitus on Host]
-  Digitus --> HP[HP OfficeJet 4558]
+    Proxmox[Proxmox Host]
+    Proxmox --> VM_PRINT[Print-VM / CUPS]
+    Proxmox --> VM_MON[Debian Monitoring]
+    Proxmox --> Docker[Docker / Swarm / Portainer]
+    VM_PRINT --> Digitus[Digitus Printserver]
+    Digitus --> HP[HP OfficeJet]
 ```
+
+---
+
+## Betriebsregeln
+
+- Interne Systemdatenträger und ZFS-Pools sind geschützt
+- Änderungen an Netzwerken und Bridges nur nach gründlicher Prüfung
+- Backups vor größeren Änderungen aktivieren
+- Druck- und Print-Workflows separat dokumentieren und absichern

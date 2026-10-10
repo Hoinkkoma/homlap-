@@ -4,123 +4,109 @@ Zentrale Monitoring- und Management-Plattform des Homelabs.
 
 ---
 
-## 🎯 Überblick
+## Überblick
 
-Der Debian Monitoring Server fungiert als:
-- **Monitoring-Zentrale:** Erfasst Metriken aller Systeme
-- **Log-Aggregation:** Zentrale Speicherung aller Logs
-- **Management-Konsole:** Verwaltung von Systemen & Diensten
-- **Status-Dashboard:** Zentrale Übersicht (Homepage)
+Der Debian Monitoring Server übernimmt folgende Aufgaben:
+
+- Monitoring-Zentrale für Host- und Service-Metriken
+- Log-Aggregation und zentrale Sicht auf Fehler und Aktivitäten
+- Management-Konsole für Server- und Dienstzustände
+- Status-Dashboard für den Betrieb des Homelabs
 
 ---
 
-## 📈 Komponenten
+## Komponenten
 
 ### Prometheus
-- **Aufgabe:** Metrik-Erfassung & Zeitreihendatenbank
-- **URL:** `http://[LOKAL]:9091`
-- **Config:** `/etc/prometheus/prometheus.yml`
-- **Retention:** TBD (Standard: 15d)
 
-**Jobs:**
-- `node-debian`: Debian Server Metriken
-- `node-proxmox`: Proxmox Server Metriken
-- `docker`: Docker Container Stats
-- `proxmox`: Proxmox-spezifische Metriken
+- Aufgabe: Metrik-Erfassung und Zeitreihendatenbank
+- Konfigurationsdatei: `/etc/prometheus/prometheus.yml`
+- Typische Ziele: Host-Metriken, Container-Metriken, Docker- und Service-Endpoints
 
 ### Grafana
-- **Aufgabe:** Dashboarding & Visualisierung
-- **URL:** `http://[LOKAL]:3002`
-- **Datasources:** Prometheus, Loki
-- **Dashboards:** System, Proxmox, Docker, Netzwerk
 
-### Loki
-- **Aufgabe:** Log-Aggregation & Suche
-- **URL:** `http://[LOKAL]:3100`
-- **Storage:** `/var/lib/loki`
-- **Retention:** TBD
+- Aufgabe: Dashboards und Visualisierung
+- Typischer Zugriff: `http://[LOKAL]:3002`
+- Datasources: Prometheus, Loki, VictoriaMetrics (je nach Deployment)
 
-**Log-Quellen:**
-- Systemd Logs
-- Docker Logs
-- Applikations-Logs
-- Netzwerk-Logs
+### Loki / VictoriaMetrics
+
+- Aufgabe: Log- und Zeitreihenspeicherung
+- Einsatz: zentrale Diagnose, Trendanalyse, Service-Status
 
 ### Uptime Kuma
-- **Aufgabe:** Service Monitoring
-- **URL:** `http://[LOKAL]:3001`
-- **Monitore:** HTTP, TCP, ICMP, SSL
+
+- Aufgabe: Service-Monitoring
+- Zweck: HTTP-, TCP-, ICMP- und SSL-Checks für kritische Dienste
 
 ### Scrutiny
-- **Aufgabe:** SMART-Festplattenüberwachung
-- **URL:** `http://[LOKAL]:8085`
-- **Datenbank:** SQLite
-- **Alerts:** Bei S.M.A.R.T. Warnungen
+
+- Aufgabe: SMART-Festplattenüberwachung
+- Zweck: Laufwerkszustände und mögliche Fehler früh erkennen
 
 ### Cockpit
-- **Aufgabe:** Webbasierte Serververwaltung
-- **URL:** `https://[LOKAL]:9090`
-- **Features:** System Info, Logs, Dateien, Benutzer
+
+- Aufgabe: Webbasierte Serververwaltung
+- Zweck: Systemstatus, Dienste, Logs und Basisverwaltung zentral
 
 ---
 
-## 🔧 Installation & Setup
+## Anforderungen
+
+- Debian-basierter Host mit ausreichender Ressourcenreserve
+- Netzwerk-Konnektivität zum Rest des Homelabs
+- Speicherplatz für Logs, Metriken und Backups
+- stabile, lokale Zugriffskontrolle
+
+---
+
+## Installation & Setup
 
 ### Voraussetzungen
-- Debian 12 (Bookworm)
-- 4+ GB RAM
-- 20+ GB Disk
-- Netzwerk-Konnektivität
 
-### Installationsschritte
+- Debian 12 (Bookworm) oder neuer
+- 4 GB RAM oder mehr
+- 20 GB Festplattenspeicher oder mehr
+- funktionierende Netzwerkkonfiguration
+
+### Beispiel-Installation
 
 ```bash
-# Updates
 sudo apt update && sudo apt upgrade -y
-
-# Prometheus Installation
 sudo apt install -y prometheus prometheus-node-exporter
-
-# Grafana Installation
 sudo apt install -y grafana-server
-
-# Loki Installation
-# (Download from: https://github.com/grafana/loki/releases)
-
-# Docker & Compose
 sudo apt install -y docker.io docker-compose
-
-# Weitere Services
 sudo apt install -y cockpit cockpit-docker
 ```
 
 ---
 
-## 📋 Wartung & Checks
+## Wartung & Checks
 
 ### Tägliche Checks
-- [ ] Alle Services laufen (systemctl status)
+
+- [ ] Alle Services laufen
 - [ ] Keine kritischen Alerts in Grafana
-- [ ] Disk-Space-Nutzung prüfen
-- [ ] Netzwerk-Konnektivität
+- [ ] Speicher- und Logspeicher prüfen
+- [ ] Netzwerkverbindung und wichtige Services testen
 
 ### Wöchentliche Checks
+
 - [ ] Backup-Status prüfen
-- [ ] Log-Größe überprüfen
+- [ ] Log-Größe und Retention kontrollieren
 - [ ] Performance-Trends analysieren
-- [ ] Updates verfügbar?
+- [ ] Updates und Sicherheits-Patches prüfen
 
 ### Monatliche Checks
+
 - [ ] Sicherheits-Updates einspielen
-- [ ] Zertifikate überprüfen
-- [ ] Disaster Recovery testen
+- [ ] Zertifikate und Auth prüfen
+- [ ] Disaster-Recovery und Restore-Prozesse testen
 - [ ] Dokumentation aktualisieren
 
 ---
 
-## 🚀 Tipps & Tricks
-
-### Query-Beispiele (PromQL)
+## PromQL-Beispiele
 
 ```promql
 # CPU-Nutzung
@@ -133,20 +119,19 @@ sudo apt install -y cockpit cockpit-docker
 (1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) * 100
 ```
 
-### Log-Suche (Loki)
+---
 
-```
-{job="systemd"} | grep "error"
-{container="jellyfin"} | json | status=`5xx`
-```
+## Hinweise
+
+- Für reale Zielendpunkte sollten nur Hostnames oder interne, freigegebene Endpunkte genutzt werden.
+- Anfällige oder fehlerhafte Monitoring-Targets bevorzugt als lokale, dokumentierte Services betreiben.
+- Für produktive Installationen sollten Daten und Logs regelmäßig gesichert werden.
 
 ---
 
-## 📖 Weitere Ressourcen
+## Weitere Ressourcen
 
 - [Prometheus Docs](https://prometheus.io/docs/)
 - [Grafana Docs](https://grafana.com/docs/)
-- [Loki Docs](https://grafana.com/docs/loki/)
 - [Uptime Kuma](https://uptime.kuma.pet/)
-- [Scrutiny](https://github.com/AnalogJ/scrutiny)
 - [Cockpit Project](https://cockpit-project.org/)

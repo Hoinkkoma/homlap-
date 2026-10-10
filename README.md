@@ -2,653 +2,334 @@
 
 **Letzte Aktualisierung:** 10. Oktober 2026  
 **Maintainer:** @Hoinkkoma  
-**Zweck:** Zentrale technische Dokumentation und Kontext für Hardware, Dienste, Sicherheit, Monitoring und zukünftige Erweiterungen.
+**Zweck:** Zentrale technische Dokumentation und Projektkontext für Hardware, Dienste, Sicherheitsmaßnahmen, Monitoring und zukünftige Erweiterungen.
 
-> Hinweis: Diese öffentlich zugängliche Dokumentation enthält keine konkreten IP-Adressen. Für den betrieblichen Einsatz werden nur interne, freigegebene Konfigurationen verwendet. Relevante Netzwerkdaten werden lokal und separat verwaltet.
+> Hinweis: Diese Dokumentation ist bewusst auf generische, sichere Konfigurationshinweise reduziert. Konkrete interne IP-Adressen und produktive Netzdaten werden lokal, separat und nur mit Freigabe verwaltet.
 
 ---
 
 ## 1. Projektübersicht
 
-Das Homelab basiert auf einer selbst betriebenen Infrastruktur aus Proxmox VE, Debian, Docker und Docker Swarm. Die Umgebung dient als langlebiger, dokumentierter Betriebskontext für Verwaltung, Medien, Monitoring, KI- und Backup-Aufgaben.
+Das Homelab basiert auf einer selbst betriebenen Infrastruktur aus Proxmox VE, Debian, Docker und Docker Swarm. Ziel ist ein stabiler, dokumentierter Betrieb mit Fokus auf Datensicherheit, Verwaltung, Monitoring, Medien und Backup-Strategie.
 
-Langfristige Zielbereiche:
+Wichtige Bereiche:
 
 - Proxmox-Cluster mit mehreren physischen Hosts
-- Docker Swarm zur Verteilung von Containern über mehrere Rechner
-- Zentrale Verwaltung mit Portainer und ergänzenden Tools
-- Lokale KI- und Agenten-Umgebungen
+- Docker Swarm zur Verteilung von Containern
+- Zentrale Verwaltung mit Portainer und Zusatzwerkzeugen
+- Lokale KI-/Agenten-Umgebungen
 - Monitoring, Metriken und Logs
-- Netzwerkabsicherung und Fernzugriff über Tailscale
+- Netzwerkabsicherung und Fernzugriff via Tailscale
 - AdGuard Home als DNS-Schutz
 - Nextcloud für persönliche Daten und Fotos
 - Jellyfin für Medienwiedergabe
 - Separates NAS für Backups von VMs, Containern und Konfigurationen
-- Automatisierte Wartung, Fehlersuche und kontrollierte Wiederherstellung
+- Automatisierte Wartung, Fehleranalyse und kontrollierte Recovery
 
 ### Grundprinzipien
 
-1. Bestehende Systeme nicht unnötig neu installieren.
-2. Produktive Dienste möglichst ohne Unterbrechung betreiben.
-3. Änderungen zuerst prüfen, dann planen und erst nach Bewertung ausführen.
-4. Vor riskanten Änderungen Backups und Rollback-Möglichkeiten vorbereiten.
+1. Bestehende Systeme nicht unnötig umstellen.
+2. Produktive Dienste möglichst ohne Ausfall betreiben.
+3. Vor Änderungen Ist-Zustand erfassen und Risiken prüfen.
+4. Vor riskanten Änderungen Backups und Rollback-Pläne vorbereiten.
 5. Hardware gezielt nach Aufgaben einsetzen.
-6. GPU-intensive Anwendungen auf dem leistungsstärksten Proxmox-Host priorisieren.
-7. Der Debian-Server muss dauerhaft erreichbar bleiben.
-8. Interne Datenträger nicht ohne Zustimmung ändern.
-9. Keine unkontrollierten Änderungen an Netzwerkbrücken, Firewallregeln, Swarm-Managern oder Storage vornehmen.
-10. Sicherheitsrelevante Änderungen müssen nachvollziehbar und möglichst reversibel sein.
+6. GPU-lastige Arbeiten auf dem stärksten Proxmox-Host priorisieren.
+7. Kritische Infrastrukturserver dauerhaft erreichbar halten.
+8. Interne Datenträger nur mit ausdrücklicher Freigabe verändern.
+9. Keine unkontrollierten Änderungen an Bridges, Firewall, Swarm oder Storage.
+10. Sicherheitsrelevante Änderungen müssen nachvollziehbar und reversibel sein.
 
 ---
 
-## 2. Physische Hardware
+## 2. Infrastruktur
 
-### 2.1 Proxmox-Tower `pve`
+### Proxmox-Tower
 
-**Rolle:** Hauptserver, leistungsstarker Proxmox-Host, Docker-Swarm-Manager und GPU-Node.
-
-- CPU: Intel Core i7-4770, 4 Kerne / 8 Threads
-- RAM: ca. 32 GB
-- GPU: NVIDIA Quadro P400
+- Rolle: leistungsstarker Proxmox-Host, Docker-Swarm-Manager und GPU-Node
 - Hypervisor: Proxmox VE
-- Docker Engine: dokumentierter Stand mit aktiver Swarm-Konfiguration
-- Dateisystem: ZFS
+- Speicher: ZFS-basierter Systempool
+- GPU: NVIDIA Quadro P400 oder vergleichbare GPU-Klasse
+- Aufgabe: Virtualisierung, Container, KI-Workloads, Medien- und Monitoring-Services
 
-**Bekannte Eigenschaften**
+### Debian-Server
 
-- Der Tower ist der leistungsstärkste Rechner im Verbund.
-- GPU-Workloads sollen bevorzugt hier laufen.
-- Die Quadro P400 ist für bestimmte Jellyfin-Transkodierungsaufgaben vorgesehen.
-- Nicht alle Container sollen dauerhaft auf diesem Host laufen.
-- Das System soll langfristig Teil eines größeren Proxmox-Verbunds werden.
+- Rolle: dauerhaft laufender Infrastrukturserver
+- Aufgabe: zentrale Dienste, Monitoring, Netzwerkinfrastruktur, Verwaltung
+- Anforderungen: hoher Verfügbarkeitsanspruch, Stromsparfunktionen kontrolliert, kein ungewollter Shutdown
 
-### 2.2 Debian-Server `debianserver`
+### Debian-Node
 
-**Rolle:** Dauerhaft laufender Infrastrukturserver, Netzwerkdienste und Docker-Node.
+- Rolle: zusätzlicher Swarm-Worker
+- Aufgabe: leichtere Container, Testdienste und einfache Monitoring-Agenten
 
-- Hardware: Mini-PC / Serverklasse
-- Betriebssystem: Debian
-- RAM: etwa 16 GB
-- Tailscale: aktiv, für Fernzugriff und interne Kommunikation
-- Docker Engine: dokumentierter Stand
-- Docker Swarm: Node aktiv
+### HP ProDesk 400 G5 SFF
 
-**Wichtige Anforderung:** Dieser Server soll dauerhaft eingeschaltet bleiben. Er ist für zentrale Dienste und den Fernzugriff wichtig.
-
-### 2.3 Debian-Node `debian-it`
-
-**Rolle:** Zusätzlicher Swarm-Worker, leichte Container und mögliche Dashboard-Aufgaben.
-
-- Hardware: älterer iMac / klassischer Rechner
-- RAM: etwa 2 GB
-- Betriebssystem: Debian
-- Docker Engine: dokumentierter Stand
-- Docker Swarm: Node aktiv
-
-**Geplante Aufgaben**
-
-- Leichte Dienste und Testcontainer
-- Monitoring-Agenten
-- Gegebenenfalls Dashboard- oder Anzeigeaufgaben
-- Keine speicherintensiven KI-Modelle oder großen produktiven Workloads
-
-### 2.4 HP ProDesk 400 G5 SFF
-
-**Status:** Angeschafft; als Erweiterung der Infrastruktur vorgesehen.
-
-- Formfaktor: Small Form Factor
-- CPU: Intel Core i5-8500
-- Ursprüngliche Ausstattung: 8 GB RAM, 128 GB Speicher
-- Ausbaubedarf: potenziell auf 32 GB RAM
-
-**Planung:**
-
-- Verwendung als zusätzlicher Proxmox-Node
-- Erweiterung für weitere Infrastrukturaufgaben
-- Vor einer Installation müssen Hardwarezustand, RAM, Datenträger und aktuelle Betriebssysteminstallation geprüft werden
-
-### 2.5 Weitere Netzwerkhardware
-
-Bekannt sind:
-
-- Unmanaged Switches
-- Überspannungsschutz-Steckdosenleiste
-- Digitus Printserver
-- HP OfficeJet Drucker
-- Weitere Strom- und Anschlusskabel
+- Status: als späterer Ausbaukandidat für weitere Infra-Kapazität vorgesehen
+- Aufgaben: zusätzlicher Proxmox-Node, Erweiterung des Clusters, Backup-/Testumgebung
 
 ---
 
 ## 3. Netzwerk und Fernzugriff
 
-### 3.1 Netzwerkübersicht
-
-Das Homelab nutzt ein internes LAN sowie Tailscale für Fernzugriff und sichere Verknüpfung zwischen Hosts. Konkrete Adressen werden nur lokal in den Einsatzkonfigurationen verwaltet.
+Das Homelab nutzt ein internes LAN sowie Tailscale für Fernzugriff und sichere Verknüpfung zwischen Hosts.
 
 Wichtige Punkte:
 
-- Interner Home-LAN mit separaten Gerätegruppen
-- Tailscale für Fernzugriff und Knotenverbindung
-- Zentrale Dienste auf stabilen, dauerhaft laufenden Hosts
-- Historische Konfigurationen werden nicht blind übernommen
+- Lokales Heimnetz für interne Dienste
+- Tailscale für Fernzugriff und Knotenkommunikation
+- Trennung von Management-, Services- und Print-Zonen nach Möglichkeit
+- Historische Konfigurationen nicht blind übernehmen
 
-### 3.2 Proxmox-Netzwerkbesonderheiten
+### Sicherheitsprinzipien
 
-Es wurde eine problematische Netzwerkkonfiguration dokumentiert, darunter:
-
-- Mehrere Bridges mit überlappenden oder duplizierten Subnet-Konfigurationen
-- Tailscale-Interface mit lokaler Route
-- Aktivierte physische Schnittstelle mit eingeschränkter Bandbreite
-- Verknüpfung mit einem Nebenhost im internen LAN
-
-**Wichtige Einschränkung:** Die Netzwerkkonfiguration darf nicht spontan geändert werden. Vor Änderungen sind Bridge-Zuordnungen, physische Schnittstellen, Routing, ARP/Nachbartabellen und VM-Netze vollständig zu erfassen.
-
-### 3.3 Tailscale
-
-Tailscale wird für Fernzugriff und Verbindungen zwischen Hosts verwendet.
-
-Ziel:
-
-- Sicherer Fernzugriff ohne öffentliche Portfreigaben
-- Verbindungen zwischen Proxmox, Debian-Server und weiteren Knoten
-- Nutzung von Subnet-Routing nur mit sauberer, dokumentierter Konfiguration
-
-**Kritische Anforderung:** Der Debian-Server soll dauerhaft online bleiben, damit Fernzugriff und abhängige Netzwerkfunktionen nicht ausfallen.
+- Brücken, Routing und Firewall vor Änderungen vollständig prüfen
+- Keine ungetesteten Änderungen an produktiven Netzen
+- Tailscale- und DNS-Konfigurationen separat dokumentieren
+- Drucker- und Printserver stets in eigener, begrenzter Zone betreiben
 
 ---
 
-## 4. Proxmox und Storage
+## 4. Storage und Backups
 
-### 4.1 Proxmox-Systempool
+### Proxmox-Storage
 
-Der Proxmox-Host verwendet einen ZFS-Pool `rpool` mit internen Systemlaufwerken.
+- Interne ZFS-Systemdatenträger sind geschützt und dürfen nicht ohne Freigabe formatiert oder verändert werden.
+- Backup-Laufwerke müssen vor jeder Nutzung neu verifiziert werden.
 
-**Unverhandelbare Schutzregel:** Die internen Systemdatenträger dürfen nicht formatiert, neu partitioniert, überschrieben oder für Experimente verwendet werden, solange dies nicht ausdrücklich genehmigt wurde.
+### Backup-Strategie
 
-### 4.2 USB-Backup-Datenträger
+Ziel ist eine klare Trennung zwischen produktiven Systemen und Backups:
 
-Ein externer USB-Backup-Datenträger ist dokumentiert. Vor jeder Speicheroperation müssen Gerät, UUID, Mountpoint und tatsächlicher Inhalt einzeln geprüft werden.
-
-**Wichtige Sicherheit:** Gerätebezeichnungen wie `/dev/sdX` sind nicht dauerhaft stabil und dürfen nicht unkritisch verwendet werden.
-
-### 4.3 USB-ISO-Sticks
-
-Dokumentierte ISO-Sticks wurden separat verwaltet. Ein früher gemeldetes Gerät mit null Byte Kapazität wurde als fehlerhaft eingestuft.
-
-### 4.4 Backup-Strategie
-
-Ziel ist eine saubere Trennung zwischen Produktivsystemen und Backups.
-
-Geplant ist ein separates NAS, entweder als Eigenbau oder als fertige Lösung. Es soll insbesondere sichern:
-
-- Proxmox-VMs
-- Container sowie Container-Konfigurationen
-- Docker-Stacks und Compose-Dateien
-- Konfigurationen wichtiger Dienste
-- Weitere relevante Infrastrukturdateien
-
-Nextcloud ist für persönliche Daten und Fotos vorgesehen. Zusätzlich werden Backups auf dem NAS oder auf TrueNAS verwaltet. Kompression ist hilfreich, ersetzt aber keine unabhängigen Sicherungsebenen.
+- Proxmox-VMs sichern
+- Docker-Stacks und Compose-Dateien sichern
+- Konfigurationen zentraler Dienste dokumentieren
+- Separates NAS oder TrueNAS für langfristige Sicherung planen
+- Nextcloud für persönliche Daten und Fotos getrennt betreiben
 
 ---
 
 ## 5. Docker Swarm
 
-### 5.1 Architektur
+Docker Swarm dient als Orchestrierungsschicht für Container über mehrere Nodes.
 
-Docker Swarm soll Container automatisch auf geeignete Nodes verteilen.
+Zielarchitektur:
 
-Dokumentierte Nodes:
-
-- `pve`: leistungsstarker Host, GPU und zentrale Infrastruktur
+- `pve`: CPU-/GPU-intensive Container und Kern-Services
 - `debianserver`: dauerhaft verfügbare Infrastruktur- und Netzwerkdienste
-- `debian-it`: leichte Container und Testdienste
+- `debian-it`: leichtere Container, Tests und kleine Worker
 
-Alle Nodes wurden als aktiv und bereit dokumentiert; der aktuelle Status muss vor Änderungen erneut geprüft werden.
+Wichtige Regeln:
 
-### 5.2 Zielarchitektur
+- Node-Status vor Eingriffen prüfen
+- Ressourcenlimits, Constraints und Affinitäten dokumentieren
+- GPU-Dienste gezielt auf passende Hosts platzieren
+- Persistent Volumes, Netzwerke und Abhängigkeiten separat sichern
 
-Die geplante Verteilung sieht ungefähr so aus:
+### Migrationsskript
 
-- `pve`: leistungsintensive Container, GPU-Workloads und interne Infrastruktur
-- `debianserver`: dauerhaft verfügbare Netzwerkdienste und mittelgroße Workloads
-- `debian-it`: leichte Container, Testdienste und Anzeigeaufgaben
-- HP ProDesk: künftige Erweiterung für zusätzliche Kapazität
-
-Die Verteilung soll nicht nur auf festen Hostnamen basieren. Labels, Ressourcenanforderungen, Affinitäten und Platzierungsregeln sollen die Auswahl steuern.
-
-### 5.3 Bekannte Node-Labels
-
-Für die Nodes wurden Labels dokumentiert:
-
-- `pve`: `gpu=nvidia`, `tier=heavy`
-- `debianserver`: `gpu=none`, `tier=medium`
-- `debian-it`: `gpu=none`, `tier=light`
-
-Container mit GPU-Anforderungen müssen auf geeignete Hosts beschränkt werden. Ein Label allein garantiert keinen funktionierenden GPU-Zugriff; Treiber, Runtime und Gerätefreigabe müssen ebenfalls korrekt konfiguriert sein.
-
-### 5.4 Platzierung und automatische Verteilung
-
-Ein früherer Test mit nginx und einer Spread-Strategie war erfolgreich. Ziel ist:
-
-- Container sinnvoll auf verfügbare Nodes verteilen
-- Leichte Nodes vor Überlastung schützen
-- GPU-Dienste gezielt auf `pve` platzieren
-- Nicht alle Container unnötig auf dem Hauptserver konzentrieren
-- Bei Ausfällen geeigneter Nodes kontrollierte Neuplatzierungen ermöglichen
-
-### 5.5 Migrationsskript
-
-Es wurde versucht, ein Skript zur Migration bestehender Docker-Workloads nach Swarm einzusetzen:
-
-- `/usr/local/sbin/swarm-migrate-all.py`
-
-Dieses Skript darf nicht als bereits funktionsfähig vorausgesetzt werden. Vor erneuter Nutzung:
+`/usr/local/sbin/swarm-migrate-all.py` darf nicht als funktionsfähig vorausgesetzt werden. Vor erneutem Einsatz:
 
 1. Datei lesen und Syntax prüfen
-2. Abhängigkeiten und Docker-Befehle prüfen
+2. Abhängigkeiten und verwendete Docker-Befehle prüfen
 3. Bestehende Container, Volumes, Netzwerke und Portbindungen inventarisieren
 4. Dry-Run oder Testlauf durchführen
-5. Backup- und Rollback-Verfahren definieren
-6. Zunächst unkritische Dienste migrieren
+5. Backup- und Rollback-Verfahren festlegen
+6. Erst unkritische Testdienste migrieren
 
 ---
 
-## 6. Container und Infrastruktur-Dienste
+## 6. Dienste und Anwendungen
 
-### 6.1 Homepage
+### Homepage
 
+- Zweck: zentrale Startseite / Dashboard des Homelab
 - Host: Debian-Server
-- Verzeichnis: `/opt/homepage`
-- Image: `gethomepage/homepage`
-- Port: `3000`
+- Port: `3000` (Beispielwert, je nach Deployment variabel)
+- Verwendung: Übersicht über wichtige Dienste, Monitoring, Portainer, AdGuard, Resilio usw.
 
-Homepage dient als zentrale Startseite für das Homelab.
+### AdGuard Home
 
-Bekannte beziehungsweise vorgesehene Verknüpfungen:
+- Zweck: DNS-Filtern, Werbeblocker, interne Qualitätskontrolle
+- Typische Ports: `53` (DNS), `8080` (Adminoberfläche)
+- Wichtige Prüfung: Tailscale-DNS, Upstream-DNS und Fehlerzustände wie `SERVFAIL`
 
-- Proxmox
-- Grafana
-- VictoriaMetrics
-- Portainer
-- AdGuard Home
-- Resilio
+### Portainer
 
-### 6.2 AdGuard Home
+- Zweck: Docker-/Container-Verwaltung und Überblick über Swarm und Services
+- Typischer Port: `9000`
 
-- DNS-Port: `53`
-- Verwaltungsoberfläche: `8080`
-- Hauptaufgabe: DNS-Filterung und Werbe-/Tracker-Blockierung
+### Monitoring
 
-Es gab wiederholt Probleme mit der DNS-Funktion, darunter Fehlermeldungen wie `SERVFAIL` sowie unzuverlässige Blockierung. Diese müssen systematisch durch Abgleich der tatsächlichen DNS-Pfade, Upstream-Server und Konfigurationen überprüft werden.
+- Prometheus, Grafana, VictoriaMetrics, Node Exporter und vergleichbare Tools
+- Ziel: Host-Metriken, Service-Status, Backup-Ergebnisse und Netzwerkzustand überwachen
 
-### 6.3 Portainer
+### Jellyfin und Medien
 
-- Port: `9000`
-- Aufgabe: Docker-Verwaltung und Übersicht über Container und Swarm
-
-### 6.4 Weitere Verwaltungsdienste
-
-Dokumentierte Dienste und Ports:
-
-- Homepage: 3000
-- Grafana: 3002
-- VictoriaMetrics: 8428
-- Portainer: 9000
-- Dockge: 5001
-- Dozzle: 9081
-- AdGuard Admin: 8080
-- DNS: 53
-- SSH: 22
-- Proxmox: 8006
-
-### 6.5 Resilio
-
-- Dokumentierter Port: `8888`
-- War als Dienst im Homepage-Dashboard vorgesehen
+- Zweck: Medien-Wiedergabe am Fernseher oder im LAN
+- GPU-Workloads bevorzugt auf Proxmox-Hardware
+- Hardwarebeschleunigung nur mit passenden Codecs, Treibern und VRAM-Anforderungen
 
 ---
 
-## 7. Monitoring und Metriken
+## 7. KI und Agenten
 
-Das Monitoring soll den Zustand aller Hosts und wichtiger Dienste erfassen.
-
-Geplante beziehungsweise vorhandene Komponenten:
-
-- Prometheus für Scraping und Metriksammlung
-- Grafana für Dashboards
-- VictoriaMetrics für Zeitreihen
-- Node Exporter oder vergleichbare Host-Exporter
-- Docker- und Proxmox-Metriken
-
-Zu überwachende Bereiche:
-
-- CPU-Auslastung und Load
-- RAM und Swap
-- Datenträgerfüllstand und I/O
-- ZFS-Pool-Zustand
-- Docker-Container und Swarm-Tasks
-- Netzwerkverfügbarkeit und Paketverluste
-- Tailscale-Verbindungen
-- DNS-Funktion und AdGuard-Status
-- Temperaturen, sofern Sensoren verfügbar sind
-- Backup-Ergebnisse und fehlgeschlagene Jobs
-
----
-
-## 8. Lokale KI und Agenten
-
-### 8.1 Bisherige KI-Infrastruktur
-
-Es gab eine lokale KI-Installation mit Ollama.
-
-Dokumentierte Bestandteile:
-
-- Ollama mit persistentem Volume
-- API-Port `11434`
-- Modelle aus der Qwen2.5-Familie
-- LibreChat unter eigenem Verzeichnis
-
-### 8.2 Geplante Änderung
-
-Es wurde der Wunsch geäußert, Ollama vollständig zu entfernen und durch ein agentenorientiertes Setup zu ersetzen.
+Eine lokale KI-Umgebung mit Ollama war Teil der bisherigen Infrastruktur. Die langfristige Richtung ist eine agentenorientierte, lokal betriebene Architektur mit minimalen Berechtigungen.
 
 Ziel:
 
-- Lesen von Systemstatus und Logs
-- Überwachung von Containern und VMs
-- Analyse von Fehlermeldungen
-- Erstellung von Wartungs- und Fehlerberichten
-- Kontrolle von Backup-Ergebnissen
-- Analyse von Proxmox- und Docker-Konfigurationen
+- Status und Logs lesen
+- Container und VMs überwachen
+- Fehler analysieren
+- Vorschläge dokumentieren
+- Nur klar freigegebene, begrenzte Aktionen ausführen
 
-### 8.3 Sicherheitsanforderungen für KI-Agenten
+Wichtige Sicherheitsprinzipien:
 
-Die KI darf nicht automatisch uneingeschränkten Root-Zugriff erhalten.
-
-Vorgesehene Sicherheitsstufen:
-
-1. Lesen
-2. Analysieren
-3. Vorschlagen
-4. Ausführen
-5. Kritische Änderungen mit ausdrücklicher Bestätigung
-
-Sensible Daten, Zugangsdaten, Tokens, private Fotos und interne Informationen dürfen nicht unkontrolliert an externe APIs übertragen werden.
+- Read-only als Standard
+- Keine unkontrollierte Verbindung zu externen APIs
+- Keine Berechtigungen über das erforderliche Maß hinaus
+- Kritische Aktionen nur nach ausdrücklicher Freigabe
 
 ---
 
-## 9. Medienserver und GPU
+## 8. Firewall und Sicherheit
 
-Jellyfin und verwandte Medienanwendungen sind als GPU-Workloads vorgesehen.
+- Proxmox- und Debian-Firewall müssen regelmäßig überprüft werden
+- Docker-Regeln und Tailscale-Verkehr sind mit der Host-Firewall zu koordinieren
+- SSH, Web-UIs und wichtige Dienste nur gezielt freigeben
+- Keine Firewall-Regeln pauschal entfernen, ohne Auswirkungen zu prüfen
 
-Ziel:
+Empfohlene Politik:
 
-- Medienwiedergabe am Fernseher
-- Hardwarebeschleunigung, sofern von Codec, GPU und Treiber unterstützt
-- Bevorzugte Platzierung auf `pve`
-- Andere leichte Dienste weiterhin auf Debian-Nodes verteilen
-
-Die NVIDIA Quadro P400 verfügt über begrenzten VRAM. Bei der Planung müssen VRAM, unterstützte Codecs, Treiber und Transkodierungsanforderungen berücksichtigt werden.
-
-Ein weiterer erwähnter Dienst bzw. Projektname ist „Viaporama“. Seine genaue technische Rolle sollte vor Änderungen geklärt werden.
+- Standard: nur notwendige Zugriffe erlauben
+- Keine öffentlich exponierten Services ohne Authentifizierung oder VPN
+- Keine Passwörter, Tokens oder Private Keys in Git-Commits aufnehmen
 
 ---
 
-## 10. Firewall und Sicherheit
+## 9. Ausbau und Cluster
 
-### 10.1 Proxmox-Firewall
+Langfristig ist ein Proxmox-Cluster angestrebt. Geplante Erweiterungen:
 
-Frühere Konfigurationen enthielten unter anderem:
+- HP ProDesk 400 G5 SFF als zusätzlicher Knoten
+- weitere DDR4-Mini-PCs mit 2 RAM-Steckplätzen
+- Cluster-Schritte schrittweise und mit Prüfung
+- separates NAS für Backups und Wiederherstellung
 
-- INPUT-Policy `ACCEPT`
-- SSH-Freigaben
-- Freigaben für Weboberflächen und Tailscale-Verkehr
-- Interne Freigaben für bestimmte Nodes
-- Abschlussregel für bestimmte Paketmengen
+Prioritäten beim Hardwarekauf:
 
-Diese Angaben sind kein Beleg für die heutige vollständige Firewallkonfiguration. Regeln müssen aktuell gelesen und im Zusammenspiel mit Proxmox, Docker und Tailscale bewertet werden.
-
-### 10.2 Geplante Firewall-Härtung auf Debian
-
-Ziel ist eine dauerhafte, systemd-gestützte Absicherung der veröffentlichten Ports.
-
-- AdGuard und Verwaltungsdienste vor unberechtigtem Zugriff schützen
-- Zugriffe auf relevante Ports auf erlaubte Netze begrenzen
-- Tailscale-Verkehr über das lokale Tailscale-Interface weiter ermöglichen
-- Docker-Portfreigaben und direkte IPv6-Erreichbarkeit berücksichtigen
-- SSH-Zugriff nicht versehentlich sperren
-
-**Wichtig:** Vor neuen Regeln sind `iptables`, `ip6tables`, `nftables`, Docker-Regeln und systemd-Units zu prüfen. Keine Firewall pauschal leeren und keine bestehende Remote-Verbindung gefährden.
+- Zuverlässige gebrauchte Hardware bevorzugen
+- mindestens Core-i3-/Core-i5-Klasse für Knoten
+- 32 GB RAM aufrüstbar
+- genug Storage für VMs und Backups
+- Stromverbrauch und Dauerbetrieb beachten
 
 ---
 
-## 11. Proxmox-Cluster und zukünftiger Ausbau
-
-### 11.1 Ziel
-
-Langfristig soll aus den vorhandenen und künftigen Rechnern ein Proxmox-Cluster entstehen.
-
-Geplante Erweiterungen:
-
-- HP ProDesk 400 G5 SFF als zusätzliche Plattform
-- Weitere DDR4-Mini-PCs mit zwei RAM-Steckplätzen
-- Bis zu 32 GB RAM je geeignetem Node
-- Weitere kleine Switches für spätere Netzwerkerweiterung
-- Separates NAS für Backups
-
-### 11.2 Hardwareprioritäten
-
-Bei künftigen Käufen:
-
-- Gebrauchte Hardware bevorzugen, wenn sie zuverlässig und wirtschaftlich ist
-- Mindestens eine geeignete Core-i3-/Core-i5-Klasse für anspruchsvollere Nodes
-- DDR4 und nach Möglichkeit zwei RAM-Steckplätze
-- Aufrüstbarkeit auf 32 GB RAM
-- Ausreichend Storage für geplante VMs
-- Stromverbrauch, Lautstärke und Dauerbetriebsfähigkeit beachten
-
-### 11.3 NAS-Strategie
-
-Das NAS soll unabhängig von den produktiven Hosts betrieben werden, damit ein Ausfall des Hauptservers nicht automatisch auch alle Backups zerstört.
-
-Offen bleiben:
-
-- Eigenbau oder Fertigsystem
-- TrueNAS oder anderes NAS-Betriebssystem
-- Laufwerksanzahl und Kapazität
-- Redundanzkonzept
-- Netzwerkgeschwindigkeit
-- Backup-Aufbewahrung
-- Verschlüsselung
-- Wiederherstellungstests
-
----
-
-## 12. Offene Fehler und Aufgaben
+## 10. Offene Aufgaben
 
 ### Priorität 1 – Netzwerk und DNS
 
-- [ ] AdGuard-Blockierung zuverlässig zum Laufen bringen
-- [ ] DNS-Fehler anhand aktueller Logs untersuchen
-- [ ] Tailscale-DNS-Einstellungen und Client-Konfiguration prüfen
-- [ ] Aktuelle Netzwerkinterfaces, Bridges und Routingtabellen erfassen
-- [ ] Doppelte Netzkonfiguration prüfen
-- [ ] Debian-Server-Dauerbetrieb und Stromsparregeln kontrollieren
-- [ ] Erreichbarkeit des Printservers untersuchen
+- [ ] AdGuard-Blockierung stabilisieren
+- [ ] DNS-Fehler anhand aktueller Logs prüfen
+- [ ] Tailscale- und Client-Konfiguration validieren
+- [ ] Interfaces, Bridges und Routing aktualisieren
+- [ ] Konflikte zwischen Printer-, LAN- und Management-Netz prüfen
+- [ ] Debian-Server-Dauerbetrieb und Stromsparfunktionen absichern
 
 ### Priorität 2 – Docker Swarm
 
-- [ ] Aktuellen Node- und Managerstatus erfassen
-- [ ] Alle laufenden Container, Images, Volumes und Netzwerke inventarisieren
-- [ ] Bestehende Services und Swarm-Stacks dokumentieren
-- [ ] Ressourcenlimits und Placement Constraints überprüfen
-- [ ] GPU-Zugriff für bestimmte Dienste prüfen
-- [ ] Fehler im Migrationsskript untersuchen
-- [ ] Migration ausschließlich nach Test und Backup durchführen
+- [ ] Node- und Managerstatus aktuell erfassen
+- [ ] Container, Images, Volumes und Netzwerke inventarisieren
+- [ ] Services und Stacks dokumentieren
+- [ ] Ressourcenlimits und Placement Constraints prüfen
+- [ ] GPU-Zugriff für passende Dienste validieren
+- [ ] Migrationsskript mit Dry-Run testen
 
 ### Priorität 3 – Monitoring
 
-- [ ] Prometheus-Targets auf Erreichbarkeit prüfen
-- [ ] Exporter auf allen Hosts überprüfen
-- [ ] Grafana-Dashboards für CPU, RAM, Storage, Docker und Netzwerk ergänzen
-- [ ] Verfügbarkeit von AdGuard, Tailscale und Backup-Jobs überwachen
+- [ ] Prometheus-Targets prüfen
+- [ ] Exporter auf allen Hosts validieren
+- [ ] Grafana-Dashboards ergänzen
+- [ ] AdGuard-, Tailscale- und Backup-Zustände überwachen
 
-### Priorität 4 – Backups und Storage
+### Priorität 4 – Backup und Storage
 
-- [ ] USB-Backup-Datenträger und tatsächlichen Mountstatus prüfen
+- [ ] USB-Backup-Datenträger prüfen
 - [ ] Backup-Konzept für VMs, Container und Konfigurationen festlegen
-- [ ] NAS-Anforderungen und Budget konkretisieren
+- [ ] NAS-Anforderungen konkretisieren
 - [ ] Wiederherstellungstests etablieren
-- [ ] Interne ZFS-Systemdatenträger unangetastet lassen
 
 ### Priorität 5 – KI
 
-- [ ] Bestehenden KI-Stack vollständig inventarisieren
-- [ ] Entscheiden, welche Komponenten entfernt werden
-- [ ] OpenClaw-/Agentenarchitektur festlegen
-- [ ] Lesezugriffe und erlaubte Aktionen strikt begrenzen
-- [ ] Externe Datenübertragung kontrollieren
-- [ ] Erst nach erfolgreichem Ersatz alte Modelle und Volumes entfernen
+- [ ] KI-Stack inventarisieren
+- [ ] Entfernen/Ersetzen definieren
+- [ ] Agentenarchitektur festlegen
+- [ ] Berechtigungen und Datenfluss kontrollieren
 
 ### Priorität 6 – Ausbau
 
-- [ ] HP ProDesk vollständig inventarisieren
-- [ ] RAM- und Storage-Ausbau prüfen
-- [ ] Proxmox-Cluster-Erweiterung planen
+- [ ] HP ProDesk inventarisieren
+- [ ] RAM-/Storage-Ausbau prüfen
+- [ ] Proxmox-Cluster erweitern
 - [ ] NAS und Backup-Netzwerk umsetzen
-- [ ] Weitere Container und Dienste sinnvoll auf Nodes verteilen
 
 ---
 
-## 13. Arbeitsweise für GitHub Copilot
+## 11. Arbeitsweise für GitHub Copilot
 
-Copilot soll dieses Dokument als Projektkontext verwenden und bei allen Änderungen folgende Regeln beachten.
+Copilot nutzt dieses Repository als Projektkontext und sollte bei Änderungen immer diese Regeln beachten:
 
 ### Vor jeder Änderung
 
 1. Ist-Zustand erfassen
 2. Betroffene Hosts, Container, Volumes und Netzwerke identifizieren
-3. Abhängigkeiten und Auswirkungen analysieren
-4. Backup- und Rollback-Möglichkeit bestimmen
-5. Zunächst einen Plan und konkrete Befehle präsentieren
-6. Riskante Änderungen erst nach ausdrücklicher Freigabe ausführen
+3. Abhängigkeiten und Auswirkungen prüfen
+4. Backup- und Rollback-Möglichkeiten absichern
+5. Plan und konkrete Befehle vor einem Einsatz präsentieren
+6. Riskante Änderungen erst nach freier Zustimmung durchführen
 
 ### Bei Shell-Skripten
 
-- Bash-Skripte robust und nachvollziehbar gestalten
-- Für wichtige Skripte `set -Eeuo pipefail` verwenden, sofern kompatibel
-- Eingaben validieren und Fehler verständlich melden
-- Änderungen idempotent gestalten, wenn möglich
-- Vor Änderungen vorhandene Dateien sichern
-- Konfigurationen nachvollziehbar erzeugen
-- Keine Passwörter, Tokens oder privaten Schlüssel in Git commits übernehmen
+- robuste, nachvollziehbare Bash-Skripte
+- `set -Eeuo pipefail` für kritische Skripte
+- sensible Eingaben validieren
+- Änderungen möglichst idempotent gestalten
+- Backups vor Änderungen an bestehenden Dateien
+- keine Passwörter, Tokens oder Private Keys in Commits
 
 ### Bei Docker
 
-- Vorhandene Volumes und persistente Daten schützen
-- Zwischen eigenständigen Containern und Swarm-Services unterscheiden
-- Keine unbedachten `docker system prune`, Volume-Löschungen oder pauschalen Containerentfernungen
-- Ressourcenlimits und Placement Constraints begründen
-- Docker- und Swarm-Versionen auf den Nodes berücksichtigen
-- Vor Migrationen bestehende Konfigurationen sichern
+- Volumes und persistente Daten schützen
+- zwischen eigenständigen Containern und Swarm-Services unterscheiden
+- keine unkontrollierten Löschen von Volumes, Netzwerken oder Images
+- Ressourcenlimits und Platzierungsregeln dokumentieren
 
 ### Bei Proxmox und Storage
 
-- Keine Datenträger formatieren oder partitionieren, ohne ausdrückliche Zustimmung
-- Interne Systemdatenträger schützen
-- Geräte anhand von Modell, Seriennummer, UUID und Mountstatus verifizieren
-- Keine Änderungen an Bridges, Routing oder Firewall ohne Analyse der Fernzugriffsauswirkungen
-- Keine ungetesteten Änderungen an produktiven VMs vornehmen
+- keine Datenträger formatieren oder partitionieren ohne Freigabe
+- interne Systemdatenträger schützen
+- Geräte nach Modell, UUID, Mountstatus und Funktion prüfen
+- keine ungetesteten Änderungen an produktiven VMs
 
 ### Bei KI-Agenten
 
-- Prinzip der minimalen Berechtigung
-- Read-only als Standard
-- Schreibzugriffe nur für klar definierte Aufgaben
-- Kritische Aktionen mit Bestätigung
-- Keine unkontrollierte Übertragung interner Daten an externe Anbieter
+- Prinzip der minimalen Rechte
+- read-only als Standard
+- kritische Aktionen erst mit Genehmigung
+- keine unkontrollierte Übertragung sensibler Daten an externe Anbieter
 
 ---
 
-## 14. Wichtige technische Bestandsaufnahme
+## 12. Repo-Übersicht
 
-Die Dokumentation enthält sowohl bestätigte Hardwaredaten als auch historische Konfigurationsstände. Sie darf deshalb nicht als Ersatz für eine aktuelle Inventarisierung dienen.
-
-Zu Beginn einer neuen Arbeit sollte Copilot – sofern die betreffenden Hosts erreichbar sind – mindestens Folgendes erfassen:
-
-**Proxmox**
-
-- Proxmox-Version und Kernel
-- Netzwerkinterfaces, Bridges, IP-Adressen und Routing
-- ZFS-Poolstatus
-- Storage-Konfiguration
-- VMs und Container
-- Firewallstatus
-
-**Docker**
-
-- `docker node ls`
-- `docker node inspect`
-- `docker service ls`
-- `docker stack ls`
-- `docker ps -a`
-- `docker volume ls`
-- `docker network ls`
-- Docker-Versionen aller Nodes
-
-**Debian**
-
-- Betriebssystem und Kernel
-- systemd-Units für Netzwerk, Firewall und Stromsparfunktionen
-- Tailscale-Status
-- DNS-Auflösung und Erreichbarkeit der veröffentlichten Dienste
-- Mounts, Datenträger und Speicherplatz
-
-**Monitoring**
-
-- Prometheus-Targetstatus
-- Verfügbarkeit der Exporter
-- Grafana- und VictoriaMetrics-Zustand
-
----
-
-## 15. Zusammenfassung
-
-Das Homelab besteht derzeit im Wesentlichen aus einem leistungsstarken Proxmox-Tower, einem dauerhaft verfügbaren Debian-Server und einem leistungsschwachen Debian-Node. Ein HP ProDesk 400 G5 SFF ist als Erweiterung vorhanden beziehungsweise vorgesehen.
-
-Docker Swarm soll die Container sinnvoll verteilen, während Proxmox die Virtualisierung bereitstellt. Tailscale ermöglicht den Fernzugriff. AdGuard, Homepage, Portainer und das Monitoring bilden wichtige Teile der Infrastruktur.
-
-Die wichtigsten nächsten Schritte sind:
-
-1. Netzwerk- und DNS-Zustand stabilisieren
-2. Tatsächliche Docker-Swarm-Konfiguration inventarisieren
-3. Persistente Daten und Backup-Strategie absichern
-4. KI-Agenten mit begrenzten Berechtigungen einführen
-5. Die Proxmox-Infrastruktur kontrolliert erweitern
-6. Ein separates NAS für VM- und Container-Backups aufbauen
-
-**Leitlinie:** Erst den tatsächlichen Zustand feststellen, dann eine nachvollziehbare Änderung planen und erst nach Prüfung ausführen. Stabilität, Datensicherheit und Fernzugriff haben Vorrang vor schnellen Umbauten.
-
----
-
-## 16. Repo-Übersicht
-
-Die Repository-Struktur spiegelt die wichtigsten Bereiche wider:
-
-- `Debian-Monitoring/` — Monitoring- und Management-Plattform
-- `Debian/` — Debian-System, Sicherheit und Betrieb
-- `Docker/` — Container, Stack-Definitionen und Portainer
-- `Proxmox/` — Proxmox-Konfigurationen, VM/Container-Management und KI-Umgebungen
-- `Netzwerk/` — Topologie, Firewall, Drucker und Problemlösung
-- `Fehlerbehebung/` — Dokumentation bekannter Fehler und Recovery-Prozesse
-- `Wartung/` — Checklisten, Backups und Betriebsroutinen
-
-**Quick Start**
-
-- Debian Monitoring: `Debian-Monitoring/README.md`
-- Proxmox: `Proxmox/README.md`
-- Docker: `Docker/README.md`
-- Netzwerk: `Netzwerk/README.md`
-- Fehlerbehebung: `Fehlerbehebung/`
+- `README.md` – zentrale Übersicht und Projektkontext
+- `Debian-Monitoring/` – Monitoring und Management
+- `Debian/` – Debian-basierte Dienste und Betrieb
+- `Docker/` – Container, Stacks und Portainer
+- `Proxmox/` – Hypervisor- und VM-Konfigurationen
+- `Netzwerk/` – Topologie, Firewall, Drucker und Zugänge
+- `Fehlerbehebung/` – bekannte Fehler und Recovery-Schritte
+- `Wartung/` – Checklisten und Wartungspläne
 
 **Status:** Aktiv

@@ -1,28 +1,56 @@
 # Debian — Kategorie Übersicht
 
-moin — Diese Unterseite fasst alles zusammen, was mit Debian‑Servern im Homelab zu tun hat (Monitoring & Dienste).
+Diese Seite fasst die Debian-bezogenen Themen des Homelabs zusammen.
 
-Kurz:
-- Debian‑Monitoring ist zentrale Überwachungsinstanz (Prometheus, Grafana, Loki, Uptime Kuma, Scrutiny).
-- Einige Dienste (z. B. Homepage) laufen als Debian‑VMs/Containern und bieten Endpunkte, die gedruckt werden können.
+---
 
-Wichtige Dateien (Unterkategorien)
-- Debian-Monitoring/README.md — Monitoring Server Doku
-- Debian/homepage.md — kurze Beschreibung der Homepage‑App (neu)
-- Netzwerk/printserver-digitus.md — Digitus Printserver (als Unterkategorie / Integration)
+## Zweck
 
-Kurzbeschreibungen
-- Homepage (App): Empfängt Uploads/PDFs oder sendet IPP‑Jobs an print‑vm; kann lokal als Service auf Debian laufen.
-- Monitoring: Prometheus (Metriken), Grafana (Dashboards), Loki (Logs), Uptime Kuma (Service Checks), Scrutiny (SMART)
+Debian-Hosts dienen als zentrale Betriebsbasis für:
 
-Schaubild (Mermaid)
+- Monitoring- und Log-Aggregation
+- Verwaltung und Systemdienste
+- zentrale Netzwerkanbindung
+- Container-/Service-Hosts
+- lokale Helper- und Automation-Workflows
+
+---
+
+## Typische Bestandteile
+
+- Monitoring-Server mit Prometheus, Grafana und Log-Tools
+- Debian-basierte VM oder Host für Dienstverwaltung
+- Homepage-Dashboard und interne Web-Services
+- Netzwerk- und Tailscale-Integration
+- zentrale Backup-, Reparatur- und Wartungshandlungen
+
+---
+
+## Wichtige Dateien
+
+- `Debian-Monitoring/README.md` – Monitoring-Server und Metriken
+- `Debian/homepage.md` – Homepage- und Dashboard-Überblick
+- `Netzwerk/README.md` – Netzwerk- und Sicherheitskonzepte
+
+---
+
+## Zu beachten
+
+- Debian-Hosts sind oft die wichtigste Betriebsebene des Homelab.
+- Änderungen an Systemservices, Firewall und Netzwerk müssen mit Prüfung erfolgen.
+- Priorität hat Stabilität, Wiederherstellbarkeit und fehlersichere Administration.
+
+---
+
+## Beispiel-Architektur
 
 ```mermaid
-%% assets/network-zones.mmd
 flowchart TB
-  Router --> Management[Debian Monitoring]
-  Management --> Prometheus[Prometheus]\n  Management --> Grafana[Grafana]\n  Prometheus -->|scrape| VMs[VMs/Services]
-  VMs --> Homepage[Homepage App]
-  Homepage --> PrintVM[print-vm (CUPS) on Proxmox]
-  PrintVM --> Digitus[Digitus Printserver]
+    Router --> Management[Debian Monitoring]
+    Management --> Prometheus[Prometheus]
+    Management --> Grafana[Grafana]
+    Prometheus -->|scrape| VMs[VMs / Services]
+    VMs --> Homepage[Homepage App]
+    Homepage --> PrintVM[Print-VM / CUPS]
+    PrintVM --> Digitus[Digitus Printserver]
 ```
