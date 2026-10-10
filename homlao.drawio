@@ -1,151 +1,137 @@
 %%{init: {"theme": "neo-dark", "layout": "elk"}}%%
 flowchart LR
 
-    subgraph Zuhause["🏠 Zuhause"]
-      direction TB
-      fritzbox[("Router Fritzbox")]
-      subgraph beimir["Immer am Mann"]
-        phone["Nothing Phone 2a"]
-        buds["Nothing Buds 2a"]
-        watch["Xiaomi Watch"]
-      end
-      subgraph Arbeit
-        thinkbook["ThinkBook"]
-        tablet["Tablet Lenovo"]
-      end
-      subgraph Admin
-        thinkpad["ThinkPad T490s"]
-      end
-      phone -.->|"🔵 Bluetooth"| buds
-      phone -.->|"🔵 Bluetooth"| watch
-      fritzbox -.->|"📶 WLAN"| phone
-      fritzbox -.->|"📶 WLAN"| thinkbook
-      fritzbox -->|"🔌 LAN"| thinkpad
+    subgraph Internet["🌐 Internet"]
     end
 
-    subgraph Homelab["⚙️ Homelab"]
-      direction TB
-      subgraph debiansvr["🖥️ Debian Server"]
-        tailscale_d[["⚡ Tailscale (VPN-Hub)"]]
-        upkuma["Uptime Kuma"]
-        ph["Pi-Hole"]
-        homepg["Homepage"]
-      end
-      subgraph proxmox["🔶 Proxmox"]
+    subgraph Zuhause["🏠 Zuhause-Router"]
         direction TB
-        subgraph storage["💾 Storage"]
-          zfs["ZFS Pool"]
-          subgraph programs["📂 Programme"]
-            tailscale_px["Tailscale"]
-            pihole_px["Pi-Hole"]
-            ittools_px["IT-Tools"]
-            netdata_px["Netdata"]
-            clam_px["ClamAV"]
-          end
-        end
-        subgraph docker_cont["🐳 Docker Container"]
-          jellyfin["Jellyfin"]
-          forgejo["Forgejo"]
-          vaultwarden["Vaultwarden"]
-          chatwoot["ChatWoot"]
-        end
-        subgraph ai_ml["🤖 AI/ML"]
-          ollama["Ollama"]
-          opencl["OpenCL"]
-        end
-        subgraph workflow["⚙️ Workflows"]
-          n8n["n8n"]
-        end
-      end
-      
-      subgraph digitus_net["🖨️ Digitus Printserver"]
-        digitus["Digitus (LAN)"]
-        hp["HP OfficeJet 4558"]
-        digitus -->|"🔌 USB"| hp
-      end
-
-      tailscale_d --> upkuma
-      tailscale_d --> ph
-      tailscale_d --> homepg
-      tailscale_d -->|"🔒 VPN Tunnel"| tailscale_px
+        fritzbox[("🔴 Router Fritzbox<br/>WAN-Zugang")]
     end
 
-    subgraph HomeDash["📊 Homepage Dashboard"]
-      direction LR
-      hp_debian["🖥️ Debian Server"]
-      hp_proxmox["🔶 Proxmox"]
-      hp_tailscale["🔒 Tailscale"]
-      hp_pihole["🚫 Pi-Hole"]
-      hp_upkuma["💚 Uptime Kuma"]
-      hp_youtube["▶️ YouTube"]
-      hp_disney["🏰 Disney+"]
-      hp_netflix["🎬 Netflix"]
-      hp_prime["📦 Amazon Prime"]
-      hp_reddit["🤖 Reddit"]
+    subgraph NetworkSwitch["🖧 Netzwerk-Infrastruktur"]
+        direction TB
+        switch8["8-Port Gigabit Switch<br/>(Zentral verbunden)"]
+        switch4["4-Port Switch<br/>(Erweiterung)"]
+        
+        subgraph Protections["🔌 Schutz & Zubehör"]
+            surge["8-fach Überspannungsschutz"]
+            unmanaged1["Unmanaged Switch 1"]
+            unmanaged2["Unmanaged Switch 2"]
+        end
+
+        switch8 --> switch4
+        switch8 --> surge
+        switch8 -.-> unmanaged1
+        switch8 -.-> unmanaged2
     end
 
-    subgraph Cloud["☁️ Cloud"]
-      subgraph Microsoft
-        onedrive["OneDrive"]
-        auth["Authenticator"]
-        github["GitHub"]
-        mermaid_c["Mermaid"]
-      end
-      subgraph Google
-        drive["Drive"]
-        gmail["Mails"]
-        photos["Fotos"]
-      end
-      subgraph Freizeit
-        steam["Steam"]
-        battlenet["Battle.net"]
-        netflix_c["Netflix"]
-        disney_c["Disney+"]
-        prime_c["Amazon Prime"]
-        music["Amazon Music"]
-        youtube_c["YouTube"]
-        discord["Discord"]
-        reddit_c["Reddit"]
-      end
+    subgraph Server["🖥️ Server & Hosts"]
+        direction TB
+        
+        subgraph Proxmox_Server["⚙️ Proxmox Server<br/>(Lenovo ThinkCenter Tiny 2016)"]
+            px_cpu["Intel Core i7"]
+            px_ram["32 GB RAM"]
+            px_storage["2×256GB SATA SSD<br/>+ 500GB ext. SSD"]
+            px_role["Hypervisor, Docker Manager<br/>GPU-Node, KI-Workloads"]
+        end
+
+        subgraph Debian_Server["🐧 Debian Server<br/>(Lenovo ThinkCenter Mini 2014)"]
+            deb_cpu["Intel Core i3"]
+            deb_ram["16 GB RAM"]
+            deb_storage["256 GB SATA SSD"]
+            deb_role["Infrastruktur-Hub<br/>Monitoring, DNS, VPN"]
+        end
+
+        subgraph Debian_IT["💻 Debian IT<br/>(iMac 2006)"]
+            it_cpu["Intel Pentium"]
+            it_ram["2 GB RAM"]
+            it_storage["minimal"]
+            it_role["Test-/Light-Workloads<br/>Swarm-Worker"]
+        end
     end
 
-    fritzbox -->|"🔌 LAN"| tailscale_d
-    fritzbox -->|"🔌 LAN"| proxmox
-    fritzbox -->|"🔌 LAN"| digitus
-    thinkpad  -->|"🔒 VPN"| tailscale_d
-    thinkbook -.->|"🔒 VPN"| tailscale_d
-    phone     -.->|"🔒 VPN"| tailscale_d
-    tailscale_d ==>|"🌐 Internet"| Cloud
+    subgraph Docker_Services["🐳 Docker Swarm Services"]
+        direction TB
+        homepg["Homepage<br/>(Dashboard)"]
+        adguard["AdGuard Home<br/>(DNS-Filter)"]
+        portainer["Portainer<br/>(Container-Mgmt)"]
+        monitoring["Prometheus/Grafana<br/>(Monitoring)"]
+        jellyfin["Jellyfin<br/>(Media-Server)"]
+        nextcloud["Nextcloud<br/>(Persönliche Daten)"]
+    end
 
-    homepg -->|"🔌 LAN"| hp_debian
-    homepg -->|"🔌 LAN"| hp_proxmox
-    homepg -->|"🔌 LAN"| hp_tailscale
-    homepg -->|"🔌 LAN"| hp_pihole
-    homepg -->|"🔌 LAN"| hp_upkuma
-    homepg ==>|"🌐 Internet"| hp_youtube
-    homepg ==>|"🌐 Internet"| hp_disney
-    homepg ==>|"🌐 Internet"| hp_netflix
-    homepg ==>|"🌐 Internet"| hp_prime
-    homepg ==>|"🌐 Internet"| hp_reddit
+    subgraph Print_Network["🖨️ Druck-Zone"]
+        direction TB
+        digitus["Digitus Print Server<br/>(LAN-Verbindung)"]
+        hp_jet["HP OfficeJet 400<br/>Jetdirect Drucker"]
+        digitus --> hp_jet
+    end
 
-    classDef ZuhauseStyle fill:#1e3a8a,stroke:#6366f1,color:#f9fafb;
-    classDef HomelabStyle fill:#064e3b,stroke:#2dd4bf,color:#f0fdfa;
-    classDef CloudStyle fill:#3b0764,stroke:#a78bfa,color:#f5f3ff;
-    classDef VpnHubStyle fill:#065f46,stroke:#10b981,color:#ecfdf5,font-weight:bold;
-    classDef HomepageStyle fill:#7c2d12,stroke:#f97316,color:#fff7ed;
-    classDef StorageStyle fill:#1e3a5f,stroke:#60a5fa,color:#eff6ff;
-    classDef ProgramStyle fill:#312e81,stroke:#818cf8,color:#eef2ff;
-    classDef PrintStyle fill:#b45309,stroke:#fbbf24,color:#fffbeb;
-    classDef DockerStyle fill:#2d5016,stroke:#65a30d,color:#f7fee7;
-    classDef AIStyle fill:#5b21b6,stroke:#ec4899,color:#fce7f3;
+    subgraph Remote_Access["🔒 Fernzugriff & VPN"]
+        direction TB
+        tailscale["Tailscale VPN<br/>(Netzwerk-Overlay)"]
+        thinkclient1["ThinkClient 1"]
+        thinkclient2["ThinkClient 2"]
+        thinkclient3["ThinkClient 3"]
+    end
 
-    class fritzbox,phone,buds,watch,thinkbook,tablet,thinkpad ZuhauseStyle;
-    class upkuma,ph,homepg HomelabStyle;
-    class zfs StorageStyle;
-    class tailscale_px,pihole_px,ittools_px,netdata_px,clam_px ProgramStyle;
-    class drive,gmail,photos,onedrive,auth,github,mermaid_c,steam,battlenet,netflix_c,disney_c,prime_c,music,youtube_c,discord,reddit_c CloudStyle;
-    class tailscale_d VpnHubStyle;
-    class hp_debian,hp_proxmox,hp_tailscale,hp_pihole,hp_upkuma,hp_youtube,hp_disney,hp_netflix,hp_prime,hp_reddit HomepageStyle;
-    class digitus,hp PrintStyle;
-    class jellyfin,forgejo,vaultwarden,chatwoot DockerStyle;
-    class ollama,opencl AIStyle;
+    subgraph Proxmox_Internal["💾 Proxmox Intern"]
+        direction TB
+        zfs["ZFS Storage Pool<br/>(Systemdaten)"]
+        vms["VMs & Container"]
+        ollama["Ollama KI<br/>(GPU-beschleunigt)"]
+    end
+
+    %% Verbindungen Internet
+    Internet -.->|WLAN/LAN| fritzbox
+    fritzbox -->|🔌 LAN Kabel| switch8
+
+    %% Switch-Verbindungen
+    switch8 -->|direkt| Debian_Server
+    switch8 -->|direkt| Proxmox_Server
+    switch8 -->|via 4-Port| Proxmox_Server
+    switch8 -->|via 4-Port| Debian_IT
+    switch8 -->|LAN| Print_Network
+
+    %% Remote Access
+    switch8 <-->|VPN-Tunnel| tailscale
+    tailscale -.-> thinkclient1
+    tailscale -.-> thinkclient2
+    tailscale -.-> thinkclient3
+
+    %% Docker Services auf Proxmox/Debian
+    Debian_Server -.->|Swarm-Worker| Docker_Services
+    Proxmox_Server -.->|Swarm-Manager| Docker_Services
+
+    %% Proxmox interne Struktur
+    Proxmox_Server --> Proxmox_Internal
+    Proxmox_Internal --> zfs
+    zfs --> vms
+    vms --> ollama
+
+    %% Cloud/Internet für Services
+    Docker_Services -.->|Internet| Internet
+
+    %% Styling
+    classDef Internet fill:#1e40af,stroke:#3b82f6,color:#f0f9ff;
+    classDef RouterStyle fill:#7c2d12,stroke:#ea580c,color:#fff7ed;
+    classDef SwitchStyle fill:#1e293b,stroke:#64748b,color:#f1f5f9;
+    classDef ProtectionStyle fill:#3d0915,stroke:#ec4899,color:#fff1f8;
+    classDef ProxmoxStyle fill:#064e3b,stroke:#10b981,color:#ecfdf5;
+    classDef DebianStyle fill:#1e3a8a,stroke:#3b82f6,color:#eff6ff;
+    classDef DockerStyle fill:#431407,stroke:#f59e0b,color:#fefce8;
+    classDef PrintStyle fill:#5b21b6,stroke:#a78bfa,color:#faf5ff;
+    classDef TailscaleStyle fill:#047857,stroke:#14b8a6,color:#f0fdfa;
+    classDef StorageStyle fill:#1f2937,stroke:#9ca3af,color:#f9fafb;
+
+    class Internet InternetStyle;
+    class fritzbox RouterStyle;
+    class switch8,switch4 SwitchStyle;
+    class surge,unmanaged1,unmanaged2 ProtectionStyle;
+    class Proxmox_Server,Proxmox_Internal,px_cpu,px_ram,px_storage,px_role ProxmoxStyle;
+    class Debian_Server,Debian_IT,deb_cpu,deb_ram,deb_storage,deb_role,it_cpu,it_ram,it_storage,it_role DebianStyle;
+    class Docker_Services,homepg,adguard,portainer,monitoring,jellyfin,nextcloud DockerStyle;
+    class Print_Network,digitus,hp_jet PrintStyle;
+    class Remote_Access,tailscale,thinkclient1,thinkclient2,thinkclient3 TailscaleStyle;
+    class zfs,vms,ollama StorageStyle;
